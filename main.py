@@ -339,8 +339,8 @@ class AnimatedThemeSwitch(QWidget):
         w, h = float(self.width()), float(self.height())
 
         # Track pill
-        track_bg = _lerp_color(QColor("#0f172a"), QColor("#e2e8f0"), t)
-        track_bd = _lerp_color(QColor("#334155"), QColor("#cbd5e1"), t)
+        track_bg = _lerp_color(QColor("#0f172a"), QColor("#cfdff2"), t)
+        track_bd = _lerp_color(QColor("#334155"), QColor("#9eb9dc"), t)
         p.setBrush(track_bg)
         p.setPen(QPen(track_bd, 1.2))
         p.drawRoundedRect(QRectF(0.6, 0.6, w - 1.2, h - 1.2), 8, 8)
@@ -350,8 +350,8 @@ class AnimatedThemeSwitch(QWidget):
         thumb_w = (w - pad * 2) / 2.0
         thumb_h = h - pad * 2
         thumb_x = pad + t * thumb_w
-        thumb_bg = _lerp_color(QColor("#1e293b"), QColor("#ffffff"), t)
-        thumb_bd = _lerp_color(QColor("#475569"), QColor("#cbd5e1"), t)
+        thumb_bg = _lerp_color(QColor("#1e293b"), QColor("#eef4fc"), t)
+        thumb_bd = _lerp_color(QColor("#475569"), QColor("#9eb9dc"), t)
         p.setBrush(thumb_bg)
         p.setPen(QPen(thumb_bd, 1.0))
         p.drawRoundedRect(QRectF(thumb_x, pad, thumb_w, thumb_h), 6, 6)
@@ -451,46 +451,40 @@ def build_stylesheet(theme: str) -> str:
     """Return dark or light QSS stylesheet for the Landing Suite."""
     if theme == "light":
         return """
-        QMainWindow, QWidget#Root { background-color: #f1f5f9; color: #1e293b; font-family: "Segoe UI", sans-serif; }
+        QMainWindow, QWidget#Root { background-color: #dce7f5; color: #1e293b; font-family: "Segoe UI", sans-serif; }
         QWidget#GridHost, QScrollArea#CardsScroll { background: transparent; }
         QFrame#HeroCard {
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #dbeafe, stop:0.55 #eff6ff, stop:1 #ffffff);
-            border: 1px solid #93c5fd; border-radius: 12px;
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #c8def8, stop:0.55 #dce9fa, stop:1 #eaeff9);
+            border: 1px solid #96bae8; border-radius: 12px;
         }
-        QFrame#FilterBar { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 9px; }
-        QFrame#StatusFrame { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; }
-        QFrame#ThemeSwitch { background-color: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 8px; }
-        QPushButton#SegBtn {
-            background: transparent; border: none; border-radius: 6px; padding: 5px 8px; color: #475569;
-        }
-        QPushButton#SegBtn:hover { background-color: rgba(15, 23, 42, 0.06); }
-        QPushButton#SegBtn:checked { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; }
-        QLabel#CourseBadge { background-color: #0f172a; color: #f8fafc; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
-        QLabel#Tag { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; padding: 2px 8px; border-radius: 5px; }
-        QLabel#TelemetryPill { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-family: "Consolas", monospace; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 9px; }
+        QFrame#FilterBar { background-color: #e6effa; border: 1px solid #b8cee8; border-radius: 9px; }
+        QFrame#StatusFrame { background-color: #e6effa; border: 1px solid #b8cee8; border-radius: 8px; }
+        QLabel#CourseBadge { background-color: #172554; color: #eef4fc; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
+        QLabel#Tag { background-color: #d9e6f6; color: #3b4f6b; border: 1px solid #b3c9e4; font-size: 11px; padding: 2px 8px; border-radius: 5px; }
+        QLabel#TelemetryPill { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; font-family: "Consolas", monospace; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 9px; }
         QLabel#HeroTitle { color: #0f172a; font-size: 19px; font-weight: 700; }
         QLabel#CardTitle { color: #0f172a; font-size: 13.5px; font-weight: 700; }
         QLabel#MetaLabel { color: #475569; font-size: 10.5px; font-weight: 600; }
         QLabel#MetaValue { color: #0f172a; font-size: 12.5px; font-weight: 700; }
-        QLabel#Muted { color: #475569; font-size: 11.5px; }
-        QLabel#StatusBar { color: #475569; font-family: "Consolas", monospace; font-size: 11px; }
-        QLineEdit#SearchBox { background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 7px; padding: 5px 10px; font-size: 12px; }
-        QLineEdit#SearchBox:focus { border-color: #0284c7; }
-        QPushButton { background-color: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 600; }
-        QPushButton:hover { background-color: #cbd5e1; }
+        QLabel#Muted { color: #42546e; font-size: 11.5px; }
+        QLabel#StatusBar { color: #3b4f6b; font-family: "Consolas", monospace; font-size: 11px; }
+        QLineEdit#SearchBox { background-color: #dce8f8; color: #0f172a; border: 1px solid #b3c9e4; border-radius: 7px; padding: 5px 10px; font-size: 12px; }
+        QLineEdit#SearchBox:focus { border-color: #0284c7; background-color: #eef4fc; }
+        QPushButton { background-color: #d3e1f4; color: #1e293b; border: 1px solid #adc5e3; border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 600; }
+        QPushButton:hover { background-color: #c2d6f0; border-color: #8eb0db; }
         QPushButton#LaunchBtn {
-            background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8;
+            background-color: #0284c7; color: #f0f9ff; border: 1px solid #38bdf8;
             border-radius: 7px; padding: 6px 11px; font-size: 12px; font-weight: 700;
         }
         QPushButton#LaunchBtn:hover { background-color: #0369a1; border-color: #7dd3fc; }
         QPushButton#GhostBtn {
-            background-color: transparent; color: #475569; border: 1px solid #cbd5e1;
+            background-color: rgba(211, 225, 244, 0.35); color: #3b4f6b; border: 1px solid #b4cae6;
             border-radius: 7px; padding: 6px 9px; font-size: 11.5px; font-weight: 600;
         }
-        QPushButton#GhostBtn:hover { background-color: #e2e8f0; color: #0f172a; border-color: #94a3b8; }
-        QPushButton#ChipBtn { background-color: transparent; border: 1px solid transparent; color: #475569; padding: 5px 11px; font-size: 12px; }
-        QPushButton#ChipBtn:hover { background-color: #e2e8f0; color: #0f172a; }
-        QPushButton#ChipBtn:checked { background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8; }
+        QPushButton#GhostBtn:hover { background-color: #d3e1f4; color: #0f172a; border-color: #8eb0db; }
+        QPushButton#ChipBtn { background-color: transparent; border: 1px solid transparent; color: #3b4f6b; padding: 5px 11px; font-size: 12px; }
+        QPushButton#ChipBtn:hover { background-color: #d3e1f4; color: #0f172a; }
+        QPushButton#ChipBtn:checked { background-color: #0284c7; color: #f0f9ff; border: 1px solid #38bdf8; }
         """
     return """
     QMainWindow, QWidget#Root { background-color: #0b1120; color: #e2e8f0; font-family: "Segoe UI", sans-serif; }
@@ -983,10 +977,10 @@ class LandingWindow(QMainWindow):
         is_dark = self.theme == "dark"
         self.theme_switch.set_theme(self.theme, animate=animate)
 
-        card_bg = "#162033" if is_dark else "#ffffff"
-        card_bd = "#29354d" if is_dark else "#cbd5e1"
-        card_hv = "#1a263c" if is_dark else "#f8fafc"
-        icon_fg = "#94a3b8" if is_dark else "#475569"
+        card_bg = "#162033" if is_dark else "#eaf1fb"
+        card_bd = "#29354d" if is_dark else "#b8cee8"
+        card_hv = "#1a263c" if is_dark else "#e0ebfa"
+        icon_fg = "#94a3b8" if is_dark else "#3b4f6b"
         hero_fg = "#e2e8f0" if is_dark else "#1e293b"
 
         for lab, card in self.card_widgets:
