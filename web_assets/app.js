@@ -338,11 +338,15 @@ function applyCLAHEGray(g, w, h, clipLimit, tiles) {
   return out;
 }
 
+function getCanvasBg() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--canvas-bg").trim() || "#0b1120";
+}
+
 function drawHistCanvas(canvas, g, color) {
   const ctx = canvas.getContext("2d");
   const w = canvas.width = canvas.clientWidth || 260;
   const h = canvas.height = 92;
-  ctx.fillStyle = "#0b1120";
+  ctx.fillStyle = getCanvasBg();
   ctx.fillRect(0, 0, w, h);
   const hist = new Uint32Array(256);
   for (let i = 0; i < g.length; i++) hist[g[i]]++;
@@ -549,11 +553,47 @@ async function runDeepLabOnImageData(id) {
 // ============================================================================
 // UI CONTROLLER
 // ============================================================================
-let activeCat = "All", currentLab = null, camStream = null, camRaf = null;
+let activeCat = "All", currentLab = null, camStream = null, camRaf = null, onThemeRefresh = null;
 const homeView = document.getElementById("home-view");
 const wsView = document.getElementById("workspace-view");
 const gridEl = document.getElementById("grid");
 const searchEl = document.getElementById("search");
+
+const SUN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
+const MOON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+function applyTheme(theme, animate = false) {
+  if (animate) {
+    document.body.classList.remove("theme-switching");
+    void document.body.offsetWidth;
+    document.body.classList.add("theme-switching");
+  }
+  document.documentElement.setAttribute("data-theme", theme);
+  try { localStorage.setItem("csst106-theme", theme); } catch (_) {}
+  const html = theme === "dark" ? `${SUN_SVG}<span>Light</span>` : `${MOON_SVG}<span>Dark</span>`;
+  ["theme-toggle-home", "theme-toggle-ws"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.innerHTML = html;
+  });
+  if (onThemeRefresh) onThemeRefresh();
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute("data-theme") || "dark";
+  applyTheme(cur === "dark" ? "light" : "dark", true);
+}
+
+["theme-toggle-home", "theme-toggle-ws"].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) btn.onclick = toggleTheme;
+});
+applyTheme((() => { try { return localStorage.getItem("csst106-theme") || "dark"; } catch (_) { return "dark"; } })(), false);
+
+function triggerViewAnim(el) {
+  el.classList.remove("anim-view");
+  void el.offsetWidth;
+  el.classList.add("anim-view");
+}
 
 function stopCam() {
   if (camRaf) { cancelAnimationFrame(camRaf); camRaf = null; }
@@ -562,8 +602,10 @@ function stopCam() {
 
 function renderHome() {
   stopCam();
+  onThemeRefresh = null;
   homeView.style.display = "block";
   wsView.style.display = "none";
+  triggerViewAnim(homeView);
   const q = searchEl.value.trim().toLowerCase();
   gridEl.innerHTML = "";
   LABS.filter(l => (activeCat === "All" || l.cat === activeCat) &&
@@ -606,9 +648,11 @@ document.getElementById("back-btn").onclick = renderHome;
 
 async function openLab(lab) {
   stopCam();
+  onThemeRefresh = null;
   currentLab = lab;
   homeView.style.display = "none";
   wsView.style.display = "block";
+  triggerViewAnim(wsView);
   document.getElementById("ws-pill").textContent = lab.num;
   document.getElementById("ws-pill").style.background = lab.accent;
   document.getElementById("ws-title").textContent = lab.title;
@@ -988,7 +1032,7 @@ async function mountLab5(lab, body) {
     const cvs = body.querySelector("#l5-var");
     const w = cvs.width = cvs.clientWidth || 480, h = cvs.height = 220;
     const ctx = cvs.getContext("2d");
-    ctx.fillStyle = "#0b1120"; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = getCanvasBg(); ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = "#fbbf24"; ctx.setLineDash([5, 4]);
     const y90 = h - 20 - 0.90 * (h - 35);
     ctx.beginPath(); ctx.moveTo(30, y90); ctx.lineTo(w - 10, y90); ctx.stroke();
@@ -1023,6 +1067,7 @@ async function mountLab5(lab, body) {
     body.querySelectorAll("[data-s]").forEach(x => x.classList.toggle("active", +x.dataset.s === selSample));
     drawRecon();
   });
+  onThemeRefresh = drawVariance;
   drawVariance(); drawRecon();
 }
 

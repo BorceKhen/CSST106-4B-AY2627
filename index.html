@@ -1,109 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CSST 106 — Computer Vision Laboratory Suite</title>
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
   <style>
-    :root {
+    :root, [data-theme="dark"] {
       --bg: #0b1120;
+      --hero-bg: linear-gradient(135deg, #172554, #1e293b 55%, #0f172a);
+      --toolbar-bg: #131c31;
       --panel: #162033;
+      --panel-hover: #1a263c;
+      --input-bg: #0b1120;
+      --canvas-bg: #0b1120;
       --border: #29354d;
+      --hero-border: #334155;
       --text: #e2e8f0;
+      --heading: #f8fafc;
       --muted: #94a3b8;
+      --btn-bg: #223047;
+      --btn-hover: #2d3f5e;
+      --btn-border: #354764;
+      --tag-bg: #0f172a;
+      --badge-bg: #f8fafc;
+      --badge-fg: #0f172a;
+      --accent-text: #38bdf8;
     }
+
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --hero-bg: linear-gradient(135deg, #dbeafe, #eff6ff 55%, #ffffff);
+      --toolbar-bg: #ffffff;
+      --panel: #ffffff;
+      --panel-hover: #f8fafc;
+      --input-bg: #f8fafc;
+      --canvas-bg: #e2e8f0;
+      --border: #cbd5e1;
+      --hero-border: #93c5fd;
+      --text: #1e293b;
+      --heading: #0f172a;
+      --muted: #475569;
+      --btn-bg: #e2e8f0;
+      --btn-hover: #cbd5e1;
+      --btn-border: #cbd5e1;
+      --tag-bg: #f1f5f9;
+      --badge-bg: #0f172a;
+      --badge-fg: #f8fafc;
+      --accent-text: #0284c7;
+    }
+
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 20px 18px 40px;
+      padding: 18px 16px 36px;
       background: var(--bg);
       color: var(--text);
       font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      transition: background-color 0.35s ease, color 0.35s ease;
     }
+
+    .hero, .toolbar, .card, .panel, .ws-top, .tab-bar, .mono-box, .btn, .tag, .badge, input[type="search"] {
+      transition: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .anim-view { animation: viewFadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+
+    @keyframes themePulse {
+      0% { opacity: 0.88; transform: scale(0.995); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    body.theme-switching .wrap { animation: themePulse 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+
     .wrap { max-width: 1280px; margin: 0 auto; }
     .hero {
-      background: linear-gradient(135deg, #172554, #1e293b 55%, #0f172a);
-      border: 1px solid #334155;
+      background: var(--hero-bg);
+      border: 1px solid var(--hero-border);
       border-radius: 14px;
-      padding: 20px 24px;
+      padding: 18px 22px;
       display: flex;
       flex-wrap: wrap;
-      gap: 18px;
+      gap: 16px;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
-    .hero-left { display: flex; gap: 16px; align-items: center; }
+    .hero-left { display: flex; gap: 14px; align-items: center; min-width: 0; }
     .hero-logo {
-      width: 56px; height: 56px; border-radius: 14px;
+      width: 52px; height: 52px; border-radius: 13px; flex-shrink: 0;
       display: grid; place-items: center;
       border: 1.5px solid #38bdf8;
-      background: rgba(2,132,199,0.22);
-      color: #38bdf8;
+      background: rgba(2,132,199,0.18);
+      color: var(--accent-text);
     }
     .badge {
-      background: #f8fafc; color: #0f172a;
+      background: var(--badge-bg); color: var(--badge-fg);
       font-size: 11px; font-weight: 700;
       padding: 4px 10px; border-radius: 6px; display: inline-block;
     }
     .tag {
-      background: #0f172a; color: var(--muted);
-      border: 1px solid #334155; font-size: 11px;
+      background: var(--tag-bg); color: var(--muted);
+      border: 1px solid var(--border); font-size: 11px;
       padding: 3px 8px; border-radius: 5px; display: inline-block;
     }
-    h1 { margin: 6px 0 8px; font-size: 22px; color: #f8fafc; }
-    .meta { display: flex; gap: 26px; flex-wrap: wrap; }
+    h1 { margin: 6px 0 8px; font-size: clamp(18px, 2.5vw, 22px); color: var(--heading); }
+    .meta { display: flex; gap: 22px; flex-wrap: wrap; }
     .meta small { display: block; color: var(--muted); font-size: 11px; font-weight: 600; }
-    .meta strong { font-size: 13.5px; color: #f1f5f9; }
+    .meta strong { font-size: 13.5px; color: var(--heading); }
+    .hero-actions { display: flex; gap: 8px; flex-direction: column; align-items: flex-end; }
+    .hero-btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 7px 13px; border-radius: 7px; font-size: 12.5px; font-weight: 600;
-      text-decoration: none; background: #223047; color: var(--text);
-      border: 1px solid #354764; cursor: pointer;
+      padding: 7px 12px; border-radius: 7px; font-size: 12.5px; font-weight: 600;
+      text-decoration: none; background: var(--btn-bg); color: var(--text);
+      border: 1px solid var(--btn-border); cursor: pointer;
     }
-    .btn:hover { background: #2d3f5e; border-color: #64748b; }
+    .btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
     .btn-primary { background: #0284c7; color: #fff; border-color: #38bdf8; }
     .btn-primary:hover { background: #0369a1; }
+
+    .theme-btn svg { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    [data-theme="light"] .theme-btn svg { transform: rotate(180deg); }
+
     .toolbar {
-      background: #131c31; border: 1px solid #25334d; border-radius: 10px;
-      padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: space-between; align-items: center; margin-bottom: 14px;
+      background: var(--toolbar-bg); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: space-between; align-items: center; margin-bottom: 12px;
     }
     .toolbar label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; }
-    .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12px; }
+    .chips { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; font-size: 12px; }
     .chip {
       background: transparent; border: 1px solid transparent; color: var(--muted);
-      padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer;
+      padding: 6px 11px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
-    .chip:hover { background: #1e293b; color: #f8fafc; }
+    .chip:hover { background: var(--btn-bg); color: var(--heading); }
     .chip.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
     input[type="search"] {
-      background: #0b1120; color: #f8fafc; border: 1px solid #334155;
-      border-radius: 7px; padding: 7px 11px; font-size: 12px; width: 280px;
+      background: var(--input-bg); color: var(--text); border: 1px solid var(--border);
+      border-radius: 7px; padding: 7px 11px; font-size: 12px; width: 260px; max-width: 100%;
     }
     .grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 14px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px;
     }
     .card {
       background: var(--panel); border: 1px solid var(--border);
       border-left: 4px solid var(--accent, #38bdf8); border-radius: 12px;
-      padding: 15px; display: flex; flex-direction: column; gap: 10px;
+      padding: 14px; display: flex; flex-direction: column; gap: 9px;
     }
-    .card:hover { background: #1a263c; border-color: var(--accent, #38bdf8); }
-    .card-head { display: flex; gap: 12px; align-items: flex-start; }
+    .card:hover { background: var(--panel-hover); border-color: var(--accent, #38bdf8); transform: translateY(-2px); }
+    .card-head { display: flex; gap: 11px; align-items: flex-start; }
     .lab-icon {
-      width: 40px; height: 40px; flex-shrink: 0; border-radius: 9px;
+      width: 38px; height: 38px; flex-shrink: 0; border-radius: 9px;
       border: 1.4px solid; display: grid; place-items: center; padding: 7px;
     }
-    .card-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+    .card-top { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
     .lab-pill {
       background: var(--accent, #38bdf8); color: #0f172a;
       font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px;
     }
-    .card h2 { margin: 0; font-size: 14.5px; color: #f8fafc; }
-    .card p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.45; flex: 1; }
-    .card-actions { display: flex; gap: 8px; }
+    .card h2 { margin: 0; font-size: 14.5px; color: var(--heading); }
+    .card p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.42; flex: 1; }
+    .card-actions { display: flex; gap: 7px; flex-wrap: wrap; }
     .btn-lab {
       flex: 2; background: var(--accent, #38bdf8); color: #0f172a;
       border-color: var(--accent, #38bdf8); font-weight: 700;
@@ -112,48 +175,67 @@
 
     /* Workspace view */
     .ws-top {
-      background: #131c31; border: 1px solid #25334d; border-radius: 11px;
-      padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 10px;
-      align-items: center; justify-content: space-between; margin-bottom: 12px;
+      background: var(--toolbar-bg); border: 1px solid var(--border); border-radius: 11px;
+      padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px;
+      align-items: center; justify-content: space-between; margin-bottom: 10px;
     }
-    .ws-title-grp { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .ws-title-grp h2 { margin: 0; font-size: 17px; color: #f8fafc; }
+    .ws-title-grp { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .ws-title-grp h2 { margin: 0; font-size: 16px; color: var(--heading); }
     .tab-bar {
-      background: #131c31; border: 1px solid #25334d; border-radius: 9px;
-      padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px;
+      background: var(--toolbar-bg); border: 1px solid var(--border); border-radius: 9px;
+      padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px;
     }
     .tab {
       background: transparent; border: 1px solid transparent; color: var(--muted);
-      padding: 6px 13px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer;
+      padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer;
     }
     .tab.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
-    .ws-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
-    .ws-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-    .ws-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .ws-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+    .ws-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 10px; }
+    .ws-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
     .panel {
       background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px; display: flex; flex-direction: column; gap: 8px;
+      padding: 11px; display: flex; flex-direction: column; gap: 8px;
     }
     .panel-hdr {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 11px; font-weight: 700; color: #38bdf8; letter-spacing: 0.4px;
+      display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;
+      font-size: 11px; font-weight: 700; color: var(--accent-text); letter-spacing: 0.4px;
     }
-    .cv-canvas { width: 100%; max-height: 430px; object-fit: contain; background: #0b1120; border-radius: 6px; }
+    .cv-canvas { width: 100%; max-height: 410px; object-fit: contain; background: var(--canvas-bg); border-radius: 6px; }
     .clickable { cursor: crosshair; }
     .ctrl-stack { display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
     .ctrl-stack label { display: flex; flex-direction: column; gap: 4px; }
     .mono-box {
-      background: #0b1120; border: 1px solid #29354d; border-radius: 7px;
-      padding: 10px; font-family: Consolas, monospace; font-size: 12px;
-      color: #f1f5f9; white-space: pre-wrap; margin: 0;
+      background: var(--input-bg); border: 1px solid var(--border); border-radius: 7px;
+      padding: 9px; font-family: Consolas, monospace; font-size: 11.5px;
+      color: var(--text); white-space: pre-wrap; margin: 0; overflow-x: auto;
     }
-    .qa-box { margin-top: 10px; font-size: 13px; line-height: 1.5; color: #cbd5e1; }
-    .qa-box h3 { margin: 0 0 6px; color: #38bdf8; font-size: 14px; }
+    .qa-box { margin-top: 8px; font-size: 13px; line-height: 1.5; color: var(--text); }
+    .qa-box h3 { margin: 0 0 6px; color: var(--accent-text); font-size: 14px; }
     .face-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .face-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
     .face-item canvas { width: 100%; image-rendering: pixelated; border-radius: 4px; }
     .face-item small { font-size: 10.5px; font-family: Consolas, monospace; text-align: center; }
-    code { color: #38bdf8; }
+    code { color: var(--accent-text); }
+
+    /* Compact mobile layout */
+    @media (max-width: 700px) {
+      body { padding: 10px 10px 24px; }
+      .hero { padding: 14px; gap: 12px; }
+      .hero-logo { width: 42px; height: 42px; border-radius: 10px; }
+      .hero-actions { width: 100%; align-items: stretch; }
+      .hero-btn-row { width: 100%; }
+      .hero-btn-row .btn { flex: 1; }
+      .toolbar { padding: 8px 10px; }
+      .chips { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+      .chip { flex-shrink: 0; padding: 5px 9px; font-size: 11.5px; }
+      input[type="search"] { width: 100%; }
+      .card { padding: 12px; gap: 8px; }
+      .card-actions .btn { padding: 6px 8px; font-size: 11.5px; }
+      .ws-top { padding: 9px 10px; }
+      .cv-canvas { max-height: 270px; }
+      .face-grid { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -162,13 +244,13 @@
       <section class="hero">
         <div class="hero-left">
           <div class="hero-logo">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <ellipse cx="12" cy="12" rx="9" ry="6"/><circle cx="12" cy="12" r="3" fill="currentColor"/>
             </svg>
           </div>
           <div>
             <span class="badge">CSST 106</span>
-            <span class="tag">Perception and Computer Vision • 1st Semester, AY 2026–2027</span>
+            <span class="tag">Perception &amp; Computer Vision • 1st Sem, AY 2026–2027</span>
             <h1>Computer Vision Laboratory Suite</h1>
             <div class="meta">
               <div><small>Student</small><strong>Ron Ken S. Borce</strong></div>
@@ -176,8 +258,11 @@
             </div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;flex-direction:column;align-items:flex-end">
-          <a class="btn btn-primary" href="https://github.com/BorceKhen/CSST106-4B-AY2627" target="_blank" rel="noopener">View Repository</a>
+        <div class="hero-actions">
+          <div class="hero-btn-row">
+            <button class="btn theme-btn" id="theme-toggle-home" title="Toggle Light/Dark Mode"></button>
+            <a class="btn btn-primary" href="https://github.com/BorceKhen/CSST106-4B-AY2627" target="_blank" rel="noopener">View Repository</a>
+          </div>
           <span class="tag">7 / 7 Interactive Labs Ready</span>
         </div>
       </section>
@@ -198,13 +283,14 @@
     <div id="workspace-view" style="display:none">
       <div class="ws-top">
         <div class="ws-title-grp">
-          <button class="btn" id="back-btn">← Back to Suite</button>
+          <button class="btn" id="back-btn">← Back</button>
           <span class="lab-pill" id="ws-pill">Lab</span>
           <h2 id="ws-title">Laboratory</h2>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn theme-btn" id="theme-toggle-ws" title="Toggle Light/Dark Mode"></button>
           <a class="btn" id="ws-report" href="#">Report (.docx)</a>
-          <a class="btn" id="ws-code" href="#" target="_blank" rel="noopener">Python UI Source</a>
+          <a class="btn" id="ws-code" href="#" target="_blank" rel="noopener">Source</a>
         </div>
       </div>
       <div id="ws-body"></div>

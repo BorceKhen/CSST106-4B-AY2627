@@ -7,16 +7,18 @@ per-lab color accents, topic filter chips, search, live running-lab counter,
 and one-click access to all UIs, Reports, and Manuals.
 """
 
+import math
 from pathlib import Path
 import subprocess
 import sys
 import webbrowser
-from PyQt6.QtCore import Qt, QPointF, QRectF, QTimer, QUrl
+from PyQt6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer, QUrl
 from PyQt6.QtGui import QColor, QDesktopServices, QIcon, QPainter, QPen, QPixmap, QPolygonF
 from PyQt6.QtWidgets import (
     QApplication,
     QButtonGroup,
     QFrame,
+    QGraphicsOpacityEffect,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -223,124 +225,76 @@ def draw_vector_icon(kind: str, color_hex: str, size: int = 24, bg_hex: str | No
         p.setBrush(fg)
         for cx, cy in [(0.34, 0.26), (0.34, 0.74), (0.66, 0.32)]:
             p.drawEllipse(QPointF(s * cx, s * cy), s * 0.08, s * 0.08)
+    elif kind == "sun":
+        p.drawEllipse(QPointF(s * 0.5, s * 0.5), s * 0.18, s * 0.18)
+        for deg in range(0, 360, 45):
+            rad = math.radians(deg)
+            p.drawLine(
+                QPointF(s * (0.5 + 0.28 * math.cos(rad)), s * (0.5 + 0.28 * math.sin(rad))),
+                QPointF(s * (0.5 + 0.38 * math.cos(rad)), s * (0.5 + 0.38 * math.sin(rad))),
+            )
+    elif kind == "moon":
+        p.setBrush(fg)
+        p.drawEllipse(QPointF(s * 0.48, s * 0.5), s * 0.28, s * 0.28)
+        p.setBrush(QColor("#e2e8f0"))
+        p.setPen(Qt.PenStyle.NoPen)
+        p.drawEllipse(QPointF(s * 0.60, s * 0.42), s * 0.22, s * 0.22)
 
     p.end()
     return pm
 
 
-STYLESHEET = """
-QMainWindow, QWidget#Root {
-    background-color: #0b1120;
-    color: #e2e8f0;
-    font-family: "Segoe UI", sans-serif;
-}
-QWidget#GridHost, QScrollArea#CardsScroll {
-    background: transparent;
-}
-QFrame#HeroCard {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #172554, stop:0.55 #1e293b, stop:1 #0f172a);
-    border: 1px solid #334155;
-    border-radius: 12px;
-}
-QFrame#FilterBar {
-    background-color: #131c31;
-    border: 1px solid #25334d;
-    border-radius: 9px;
-}
-QFrame#LabCard {
-    background-color: #162033;
-    border: 1px solid #29354d;
-    border-radius: 11px;
-}
-QLabel#CourseBadge {
-    background-color: #f8fafc;
-    color: #0f172a;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
-}
-QLabel#Tag {
-    background-color: #0f172a;
-    color: #94a3b8;
-    border: 1px solid #334155;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 5px;
-}
-QLabel#HeroTitle {
-    color: #f8fafc;
-    font-size: 21px;
-    font-weight: 700;
-}
-QLabel#CardTitle {
-    color: #f8fafc;
-    font-size: 14px;
-    font-weight: 700;
-}
-QLabel#MetaLabel {
-    color: #94a3b8;
-    font-size: 11px;
-    font-weight: 600;
-}
-QLabel#MetaValue {
-    color: #f1f5f9;
-    font-size: 13px;
-    font-weight: 700;
-}
-QLabel#Muted {
-    color: #94a3b8;
-    font-size: 12px;
-}
-QLabel#StatusBar {
-    color: #cbd5e1;
-    font-family: "Consolas", monospace;
-    font-size: 11px;
-    padding: 6px 10px;
-    background-color: #131c31;
-    border: 1px solid #25334d;
-    border-radius: 7px;
-}
-QLineEdit#SearchBox {
-    background-color: #0b1120;
-    color: #f8fafc;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 12px;
-}
-QLineEdit#SearchBox:focus {
-    border-color: #38bdf8;
-}
-QPushButton {
-    background-color: #223047;
-    color: #e2e8f0;
-    border: 1px solid #354764;
-    border-radius: 7px;
-    padding: 7px 12px;
-    font-size: 12px;
-    font-weight: 600;
-}
-QPushButton:hover {
-    background-color: #2d3f5e;
-    border-color: #64748b;
-}
-QPushButton#ChipBtn {
-    background-color: transparent;
-    border: 1px solid transparent;
-    color: #94a3b8;
-    padding: 6px 12px;
-}
-QPushButton#ChipBtn:hover {
-    background-color: #1e293b;
-    color: #f8fafc;
-}
-QPushButton#ChipBtn:checked {
-    background-color: #0284c7;
-    color: #ffffff;
-    border: 1px solid #38bdf8;
-}
-"""
+def build_stylesheet(theme: str) -> str:
+    """Return dark or light QSS stylesheet for the Landing Suite."""
+    if theme == "light":
+        return """
+        QMainWindow, QWidget#Root { background-color: #f1f5f9; color: #1e293b; font-family: "Segoe UI", sans-serif; }
+        QWidget#GridHost, QScrollArea#CardsScroll { background: transparent; }
+        QFrame#HeroCard {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #dbeafe, stop:0.55 #eff6ff, stop:1 #ffffff);
+            border: 1px solid #93c5fd; border-radius: 12px;
+        }
+        QFrame#FilterBar { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 9px; }
+        QLabel#CourseBadge { background-color: #0f172a; color: #f8fafc; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+        QLabel#Tag { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; padding: 3px 8px; border-radius: 5px; }
+        QLabel#HeroTitle { color: #0f172a; font-size: 20px; font-weight: 700; }
+        QLabel#CardTitle { color: #0f172a; font-size: 14px; font-weight: 700; }
+        QLabel#MetaLabel { color: #475569; font-size: 11px; font-weight: 600; }
+        QLabel#MetaValue { color: #0f172a; font-size: 13px; font-weight: 700; }
+        QLabel#Muted { color: #475569; font-size: 12px; }
+        QLabel#StatusBar { color: #334155; font-family: "Consolas", monospace; font-size: 11px; padding: 6px 10px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 7px; }
+        QLineEdit#SearchBox { background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+        QLineEdit#SearchBox:focus { border-color: #0284c7; }
+        QPushButton { background-color: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 7px; padding: 7px 12px; font-size: 12px; font-weight: 600; }
+        QPushButton:hover { background-color: #cbd5e1; }
+        QPushButton#ChipBtn { background-color: transparent; border: 1px solid transparent; color: #475569; padding: 6px 12px; }
+        QPushButton#ChipBtn:hover { background-color: #e2e8f0; color: #0f172a; }
+        QPushButton#ChipBtn:checked { background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8; }
+        """
+    return """
+    QMainWindow, QWidget#Root { background-color: #0b1120; color: #e2e8f0; font-family: "Segoe UI", sans-serif; }
+    QWidget#GridHost, QScrollArea#CardsScroll { background: transparent; }
+    QFrame#HeroCard {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #172554, stop:0.55 #1e293b, stop:1 #0f172a);
+        border: 1px solid #334155; border-radius: 12px;
+    }
+    QFrame#FilterBar { background-color: #131c31; border: 1px solid #25334d; border-radius: 9px; }
+    QLabel#CourseBadge { background-color: #f8fafc; color: #0f172a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+    QLabel#Tag { background-color: #0f172a; color: #94a3b8; border: 1px solid #334155; font-size: 11px; padding: 3px 8px; border-radius: 5px; }
+    QLabel#HeroTitle { color: #f8fafc; font-size: 20px; font-weight: 700; }
+    QLabel#CardTitle { color: #f8fafc; font-size: 14px; font-weight: 700; }
+    QLabel#MetaLabel { color: #94a3b8; font-size: 11px; font-weight: 600; }
+    QLabel#MetaValue { color: #f1f5f9; font-size: 13px; font-weight: 700; }
+    QLabel#Muted { color: #94a3b8; font-size: 12px; }
+    QLabel#StatusBar { color: #cbd5e1; font-family: "Consolas", monospace; font-size: 11px; padding: 6px 10px; background-color: #131c31; border: 1px solid #25334d; border-radius: 7px; }
+    QLineEdit#SearchBox { background-color: #0b1120; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+    QLineEdit#SearchBox:focus { border-color: #38bdf8; }
+    QPushButton { background-color: #223047; color: #e2e8f0; border: 1px solid #354764; border-radius: 7px; padding: 7px 12px; font-size: 12px; font-weight: 600; }
+    QPushButton:hover { background-color: #2d3f5e; border-color: #64748b; }
+    QPushButton#ChipBtn { background-color: transparent; border: 1px solid transparent; color: #94a3b8; padding: 6px 12px; }
+    QPushButton#ChipBtn:hover { background-color: #1e293b; color: #f8fafc; }
+    QPushButton#ChipBtn:checked { background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8; }
+    """
 
 
 class LandingWindow(QMainWindow):
@@ -353,61 +307,74 @@ class LandingWindow(QMainWindow):
         self.base_dir = base_dir
         self.processes: list[tuple[str, subprocess.Popen]] = []
         self.card_widgets: list[tuple[dict, QFrame]] = []
+        self.doc_buttons: list[tuple[QPushButton, QPushButton]] = []
         self.active_category = "All"
+        self.theme = "dark"
+        self.grid_cols = 2
+        self._compact_hdr = False
 
         self.setWindowTitle("CSST 106 — Computer Vision Laboratory Suite")
         self.setWindowIcon(QIcon(draw_vector_icon("vision", "#38bdf8", 32, "#0f172a")))
         self.resize(1240, 800)
-        self.setMinimumSize(980, 640)
-        self.setStyleSheet(STYLESHEET)
+        self.setMinimumSize(460, 600)
 
         self._build_ui()
+        self._apply_theme(animate=False)
 
         self.poll_timer = QTimer(self)
         self.poll_timer.timeout.connect(self._refresh_running_count)
         self.poll_timer.start(1500)
 
     def _build_ui(self) -> None:
-        root = QWidget()
-        root.setObjectName("Root")
-        self.setCentralWidget(root)
+        self.root_widget = QWidget()
+        self.root_widget.setObjectName("Root")
+        self.setCentralWidget(self.root_widget)
+        self.opacity_fx = QGraphicsOpacityEffect(self.root_widget)
+        self.opacity_fx.setOpacity(1.0)
+        self.root_widget.setGraphicsEffect(self.opacity_fx)
 
-        outer = QVBoxLayout(root)
+        outer = QVBoxLayout(self.root_widget)
         outer.setContentsMargins(16, 14, 16, 14)
         outer.setSpacing(10)
 
-        # 1. Hero Header Card
+        # 1. Hero Header Card (responsive grid: side-by-side wide, stacked compact)
         hero = QFrame()
         hero.setObjectName("HeroCard")
-        hl = QHBoxLayout(hero)
-        hl.setContentsMargins(20, 16, 20, 16)
-        hl.setSpacing(16)
+        self.hero_grid = QGridLayout(hero)
+        self.hero_grid.setContentsMargins(18, 14, 18, 14)
+        self.hero_grid.setHorizontalSpacing(14)
+        self.hero_grid.setVerticalSpacing(10)
 
-        # App Vision Logo on the left
+        self.hero_left = QWidget()
+        hl = QHBoxLayout(self.hero_left)
+        hl.setContentsMargins(0, 0, 0, 0)
+        hl.setSpacing(14)
+
         logo_lbl = QLabel()
-        logo_lbl.setPixmap(draw_vector_icon("vision", "#38bdf8", 58, "#0284c7"))
+        logo_lbl.setPixmap(draw_vector_icon("vision", "#38bdf8", 54, "#0284c7"))
         hl.addWidget(logo_lbl)
 
         left_col = QVBoxLayout()
-        left_col.setSpacing(5)
+        left_col.setSpacing(4)
 
         badge_row = QHBoxLayout()
         badge_row.setSpacing(8)
         course_badge = QLabel("CSST 106")
         course_badge.setObjectName("CourseBadge")
-        sem_tag = QLabel("Perception and Computer Vision • 1st Semester, AY 2026–2027")
+        sem_tag = QLabel("Perception & Computer Vision • 1st Sem, AY 2026–2027")
         sem_tag.setObjectName("Tag")
+        sem_tag.setWordWrap(True)
         badge_row.addWidget(course_badge)
-        badge_row.addWidget(sem_tag)
-        badge_row.addStretch()
+        badge_row.addWidget(sem_tag, 1)
         left_col.addLayout(badge_row)
 
         hero_title = QLabel("Computer Vision Laboratory Suite")
         hero_title.setObjectName("HeroTitle")
+        hero_title.setWordWrap(True)
         left_col.addWidget(hero_title)
 
         info_row = QHBoxLayout()
-        info_row.setSpacing(24)
+        info_row.setSpacing(22)
         for label_txt, val_txt in [("Student", "Ron Ken S. Borce"), ("Section", "BSCS 4B")]:
             pair = QVBoxLayout()
             pair.setSpacing(1)
@@ -422,29 +389,44 @@ class LandingWindow(QMainWindow):
         left_col.addLayout(info_row)
         hl.addLayout(left_col, 1)
 
-        # Right Action Buttons
-        right_col = QVBoxLayout()
-        right_col.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        right_col.setSpacing(8)
+        # Action Buttons + Live Status
+        self.hero_right = QWidget()
+        self.right_col = QVBoxLayout(self.hero_right)
+        self.right_col.setContentsMargins(0, 0, 0, 0)
+        self.right_col.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        self.right_col.setSpacing(6)
 
-        repo_btn = QPushButton("View Repository")
-        repo_btn.setIcon(QIcon(draw_vector_icon("git", "#e2e8f0", 16)))
-        repo_btn.clicked.connect(self._on_view_repo)
-        right_col.addWidget(repo_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(8)
+        self.theme_btn = QPushButton("Light")
+        self.theme_btn.clicked.connect(self._toggle_theme)
+        self.repo_btn = QPushButton("View Repository")
+        self.repo_btn.clicked.connect(self._on_view_repo)
+        btn_row.addWidget(self.theme_btn)
+        btn_row.addWidget(self.repo_btn)
+        self.right_col.addLayout(btn_row)
 
         self.live_badge = QLabel(f"{len(LABS)} / {len(LABS)} Labs Ready • 0 Running")
         self.live_badge.setObjectName("Tag")
-        right_col.addWidget(self.live_badge, alignment=Qt.AlignmentFlag.AlignRight)
+        self.right_col.addWidget(self.live_badge, alignment=Qt.AlignmentFlag.AlignRight)
 
-        hl.addLayout(right_col)
+        self.hero_grid.addWidget(self.hero_left, 0, 0)
+        self.hero_grid.addWidget(self.hero_right, 0, 1)
+        self.hero_grid.setColumnStretch(0, 1)
         outer.addWidget(hero)
 
-        # 2. Filter & Search Bar
+        # 2. Filter & Search Bar (reflows cleanly when compact)
         filter_bar = QFrame()
         filter_bar.setObjectName("FilterBar")
-        fl = QHBoxLayout(filter_bar)
-        fl.setContentsMargins(10, 6, 10, 6)
-        fl.setSpacing(6)
+        self.filter_grid = QGridLayout(filter_bar)
+        self.filter_grid.setContentsMargins(10, 6, 10, 6)
+        self.filter_grid.setHorizontalSpacing(8)
+        self.filter_grid.setVerticalSpacing(6)
+
+        self.chips_wrap = QWidget()
+        chips_lay = QHBoxLayout(self.chips_wrap)
+        chips_lay.setContentsMargins(0, 0, 0, 0)
+        chips_lay.setSpacing(6)
 
         self.cat_group = QButtonGroup(self)
         self.cat_group.setExclusive(True)
@@ -456,15 +438,18 @@ class LandingWindow(QMainWindow):
                 b.setChecked(True)
             b.clicked.connect(lambda _chk, c=cat: self._set_category(c))
             self.cat_group.addButton(b)
-            fl.addWidget(b)
+            chips_lay.addWidget(b)
+        chips_lay.addStretch()
 
-        fl.addStretch()
         self.search_box = QLineEdit()
         self.search_box.setObjectName("SearchBox")
-        self.search_box.setPlaceholderText("Filter labs (e.g., Canny, YOLO, PCA, Segmentation)...")
-        self.search_box.setFixedWidth(290)
+        self.search_box.setPlaceholderText("Filter labs (Canny, YOLO, PCA, Segmentation)...")
+        self.search_box.setMaximumWidth(290)
         self.search_box.textChanged.connect(self._apply_filters)
-        fl.addWidget(self.search_box)
+
+        self.filter_grid.addWidget(self.chips_wrap, 0, 0)
+        self.filter_grid.addWidget(self.search_box, 0, 1)
+        self.filter_grid.setColumnStretch(0, 1)
         outer.addWidget(filter_bar)
 
         # 3. Scrollable 2-Column Lab Cards Grid
@@ -564,12 +549,11 @@ class LandingWindow(QMainWindow):
         launch_btn.clicked.connect(lambda _chk, item=lab: self._launch_lab(item))
 
         report_btn = QPushButton("Report")
-        report_btn.setIcon(QIcon(draw_vector_icon("doc", "#cbd5e1", 14)))
         report_btn.clicked.connect(lambda _chk, item=lab: self._open_doc(item, "report"))
 
         manual_btn = QPushButton("Manual")
-        manual_btn.setIcon(QIcon(draw_vector_icon("book", "#cbd5e1", 14)))
         manual_btn.clicked.connect(lambda _chk, item=lab: self._open_doc(item, "manual"))
+        self.doc_buttons.append((report_btn, manual_btn))
 
         actions.addWidget(launch_btn, 2)
         actions.addWidget(report_btn, 1)
@@ -602,12 +586,90 @@ class LandingWindow(QMainWindow):
         while self.grid.count():
             self.grid.takeAt(0)
         visible_nums = {lab["num"] for lab in visible_labs}
+        cols = self.grid_cols
+        self.grid.setColumnStretch(0, 1)
+        self.grid.setColumnStretch(1, 1 if cols == 2 else 0)
         idx = 0
         for lab, card in self.card_widgets:
             if lab["num"] in visible_nums:
                 card.show()
-                self.grid.addWidget(card, idx // 2, idx % 2)
+                self.grid.addWidget(card, idx // cols, idx % cols)
                 idx += 1
+
+    def _relayout_chrome(self, compact: bool) -> None:
+        """Stack hero actions & search bar into two rows when window is compact."""
+        self.hero_grid.removeWidget(self.hero_left)
+        self.hero_grid.removeWidget(self.hero_right)
+        self.filter_grid.removeWidget(self.chips_wrap)
+        self.filter_grid.removeWidget(self.search_box)
+
+        if compact:
+            self.hero_grid.addWidget(self.hero_left, 0, 0)
+            self.hero_grid.addWidget(self.hero_right, 1, 0)
+            self.hero_grid.setColumnStretch(1, 0)
+            self.right_col.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            self.right_col.setAlignment(self.live_badge, Qt.AlignmentFlag.AlignLeft)
+            self.filter_grid.addWidget(self.chips_wrap, 0, 0)
+            self.filter_grid.addWidget(self.search_box, 1, 0)
+            self.filter_grid.setColumnStretch(1, 0)
+            self.search_box.setMaximumWidth(16777215)
+        else:
+            self.hero_grid.addWidget(self.hero_left, 0, 0)
+            self.hero_grid.addWidget(self.hero_right, 0, 1)
+            self.hero_grid.setColumnStretch(1, 0)
+            self.right_col.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            self.right_col.setAlignment(self.live_badge, Qt.AlignmentFlag.AlignRight)
+            self.filter_grid.addWidget(self.chips_wrap, 0, 0)
+            self.filter_grid.addWidget(self.search_box, 0, 1)
+            self.filter_grid.setColumnStretch(1, 0)
+            self.search_box.setMaximumWidth(290)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        compact_hdr = self.width() < 780
+        if compact_hdr != self._compact_hdr:
+            self._compact_hdr = compact_hdr
+            self._relayout_chrome(compact_hdr)
+        new_cols = 1 if self.width() < 860 else 2
+        if new_cols != self.grid_cols:
+            self.grid_cols = new_cols
+            self._apply_filters()
+
+    def _toggle_theme(self) -> None:
+        self.theme = "light" if self.theme == "dark" else "dark"
+        self._apply_theme(animate=True)
+
+    def _apply_theme(self, animate: bool = True) -> None:
+        self.setStyleSheet(build_stylesheet(self.theme))
+        is_dark = self.theme == "dark"
+        card_bg = "#162033" if is_dark else "#ffffff"
+        card_bd = "#29354d" if is_dark else "#cbd5e1"
+        card_hv = "#1a263c" if is_dark else "#f8fafc"
+        icon_fg = "#e2e8f0" if is_dark else "#1e293b"
+
+        for lab, card in self.card_widgets:
+            accent = lab["accent"]
+            card.setStyleSheet(
+                f"QFrame#LabCard {{ background-color: {card_bg}; border: 1px solid {card_bd}; "
+                f"border-left: 4px solid {accent}; border-radius: 11px; }}"
+                f"QFrame#LabCard:hover {{ border-color: {accent}; background-color: {card_hv}; }}"
+            )
+        for rep_b, man_b in self.doc_buttons:
+            rep_b.setIcon(QIcon(draw_vector_icon("doc", icon_fg, 14)))
+            man_b.setIcon(QIcon(draw_vector_icon("book", icon_fg, 14)))
+
+        self.repo_btn.setIcon(QIcon(draw_vector_icon("git", icon_fg, 16)))
+        self.theme_btn.setText("Light" if is_dark else "Dark")
+        self.theme_btn.setIcon(QIcon(draw_vector_icon("sun" if is_dark else "moon", "#fbbf24" if is_dark else "#0f172a", 15)))
+
+        if animate:
+            anim = QPropertyAnimation(self.opacity_fx, b"opacity", self)
+            anim.setDuration(260)
+            anim.setStartValue(0.65)
+            anim.setEndValue(1.0)
+            anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+            anim.start()
+            self._theme_anim = anim
 
     def _launch_lab(self, lab: dict) -> None:
         script_path = self.base_dir / lab["folder"] / lab["script"]
