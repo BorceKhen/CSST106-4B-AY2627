@@ -560,25 +560,45 @@ const wsView = document.getElementById("workspace-view");
 const gridEl = document.getElementById("grid");
 const searchEl = document.getElementById("search");
 
-function applyTheme(theme, animate = false) {
+function applyTheme(theme, animate = false, originBtn = null) {
+  const commit = () => {
+    document.documentElement.setAttribute("data-theme", theme);
+    try { localStorage.setItem("csst106-theme", theme); } catch (_) {}
+    document.querySelectorAll(".seg-btn[data-set-theme]").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.setTheme === theme);
+    });
+    if (onThemeRefresh) onThemeRefresh();
+  };
+
+  if (animate && document.startViewTransition && originBtn &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const rect = originBtn.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const endR = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    const vt = document.startViewTransition(commit);
+    vt.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endR}px at ${x}px ${y}px)`] },
+        { duration: 420, easing: "cubic-bezier(0.22, 1, 0.36, 1)", pseudoElement: "::view-transition-new(root)" }
+      );
+    }).catch(() => {});
+    return;
+  }
+
   if (animate) {
     document.body.classList.remove("theme-switching");
     void document.body.offsetWidth;
     document.body.classList.add("theme-switching");
   }
-  document.documentElement.setAttribute("data-theme", theme);
-  try { localStorage.setItem("csst106-theme", theme); } catch (_) {}
-  document.querySelectorAll(".seg-btn[data-set-theme]").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.setTheme === theme);
-  });
-  if (onThemeRefresh) onThemeRefresh();
+  commit();
 }
 
 document.querySelectorAll(".seg-btn[data-set-theme]").forEach(btn => {
   btn.onclick = () => {
     const next = btn.dataset.setTheme;
     const cur = document.documentElement.getAttribute("data-theme") || "dark";
-    if (next !== cur) applyTheme(next, true);
+    if (next !== cur) applyTheme(next, true, btn);
   };
 });
 applyTheme((() => { try { return localStorage.getItem("csst106-theme") || "dark"; } catch (_) { return "dark"; } })(), false);

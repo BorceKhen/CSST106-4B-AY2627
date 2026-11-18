@@ -13,13 +13,12 @@ from pathlib import Path
 import subprocess
 import sys
 import webbrowser
-from PyQt6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer, QUrl
-from PyQt6.QtGui import QColor, QDesktopServices, QIcon, QPainter, QPen, QPixmap, QPolygonF
+from PyQt6.QtCore import QEasingCurve, QPointF, QRectF, Qt, QTimer, QUrl, QVariantAnimation, pyqtSignal
+from PyQt6.QtGui import QColor, QDesktopServices, QIcon, QPainter, QPainterPath, QPen, QPixmap, QPolygonF
 from PyQt6.QtWidgets import (
     QApplication,
     QButtonGroup,
     QFrame,
-    QGraphicsOpacityEffect,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -283,6 +282,171 @@ def probe_env_packages() -> list[tuple[str, str | None]]:
     return out
 
 
+def _lerp_color(c1: QColor, c2: QColor, t: float) -> QColor:
+    """Linearly interpolate between two QColors."""
+    t = max(0.0, min(1.0, t))
+    return QColor(
+        round(c1.red() + (c2.red() - c1.red()) * t),
+        round(c1.green() + (c2.green() - c1.green()) * t),
+        round(c1.blue() + (c2.blue() - c1.blue()) * t),
+        round(c1.alpha() + (c2.alpha() - c1.alpha()) * t),
+    )
+
+
+class AnimatedThemeSwitch(QWidget):
+    """Smoothly animated Moon/Sun segmented toggle switch with sliding thumb & icon spin."""
+
+    themeChanged = pyqtSignal(str)
+
+    def __init__(self, initial: str = "dark", parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setFixedSize(68, 32)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip("Switch between Dark and Light Mode")
+        self._pos = 0.0 if initial == "dark" else 1.0
+        self._anim = QVariantAnimation(self)
+        self._anim.setDuration(280)
+        self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._anim.valueChanged.connect(self._on_anim)
+
+    def _on_anim(self, val: float) -> None:
+        self._pos = float(val)
+        self.update()
+
+    def set_theme(self, theme: str, animate: bool = True) -> None:
+        target = 0.0 if theme == "dark" else 1.0
+        self._anim.stop()
+        if animate:
+            self._anim.setStartValue(self._pos)
+            self._anim.setEndValue(target)
+            self._anim.start()
+        else:
+            self._pos = target
+            self.update()
+
+    def mousePressEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            cur = "dark" if self._pos < 0.5 else "light"
+            clicked = "dark" if event.position().x() < self.width() / 2 else "light"
+            target = clicked if clicked != cur else ("light" if cur == "dark" else "dark")
+            self.themeChanged.emit(target)
+            event.accept()
+
+    def paintEvent(self, _event) -> None:
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        t = self._pos
+        w, h = float(self.width()), float(self.height())
+
+        # Track pill
+        track_bg = _lerp_color(QColor("#0f172a"), QColor("#e2e8f0"), t)
+        track_bd = _lerp_color(QColor("#334155"), QColor("#cbd5e1"), t)
+        p.setBrush(track_bg)
+        p.setPen(QPen(track_bd, 1.2))
+        p.drawRoundedRect(QRectF(0.6, 0.6, w - 1.2, h - 1.2), 8, 8)
+
+        # Sliding thumb
+        pad = 3.0
+        thumb_w = (w - pad * 2) / 2.0
+        thumb_h = h - pad * 2
+        thumb_x = pad + t * thumb_w
+        thumb_bg = _lerp_color(QColor("#1e293b"), QColor("#ffffff"), t)
+        thumb_bd = _lerp_color(QColor("#475569"), QColor("#cbd5e1"), t)
+        p.setBrush(thumb_bg)
+        p.setPen(QPen(thumb_bd, 1.0))
+        p.drawRoundedRect(QRectF(thumb_x, pad, thumb_w, thumb_h), 6, 6)
+
+        # Left Moon icon (rotates slightly + brightens when dark selected)
+        moon_cx, moon_cy = pad + thumb_w / 2.0, h / 2.0
+        moon_col = _lerp_color(QColor("#f8fafc"), QColor("#64748b"), t)
+        p.save()
+        p.translate(moon_cx, moon_cy)
+        p.rotate(-18.0 * t)
+        pm_moon = QPixmap(16, 16)
+        pm_moon.fill(Qt.GlobalColor.transparent)
+        pmp = QPainter(pm_moon)
+        pmp.setRenderHint(QPainter.RenderHint.Antialiasing)
+        pmp.setBrush(moon_col)
+        pmp.setPen(Qt.PenStyle.NoPen)
+        pmp.drawEllipse(QPointF(7.6, 8.0), 4.6, 4.6)
+        pmp.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear)
+        pmp.drawEllipse(QPointF(9.8, 6.4), 3.8, 3.8)
+        pmp.end()
+        p.drawPixmap(-8, -8, pm_moon)
+        p.restore()
+
+        # Right Sun icon (rotates smoothly as light activates)
+        sun_cx, sun_cy = pad + thumb_w * 1.5, h / 2.0
+        sun_col = _lerp_color(QColor("#94a3b8"), QColor("#f59e0b"), t)
+        p.save()
+        p.translate(sun_cx, sun_cy)
+        p.rotate(45.0 * t)
+        p.setPen(QPen(sun_col, 1.5, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.setBrush(sun_col if t > 0.5 else Qt.BrushStyle.NoBrush)
+        p.drawEllipse(QPointF(0, 0), 2.7, 2.7)
+        for deg in range(0, 360, 45):
+            rad = math.radians(deg)
+            p.drawLine(
+                QPointF(4.4 * math.cos(rad), 4.4 * math.sin(rad)),
+                QPointF(6.2 * math.cos(rad), 6.2 * math.sin(rad)),
+            )
+        p.restore()
+        p.end()
+
+
+class ThemeTransitionOverlay(QWidget):
+    """Circular radial wipe overlay revealing the new theme out from the toggle center."""
+
+    def __init__(self, parent: QWidget, old_pixmap: QPixmap, origin: QPointF) -> None:
+        super().__init__(parent)
+        self.old_pixmap = old_pixmap
+        self.origin = origin
+        self._progress = 0.0
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setGeometry(parent.rect())
+        self.raise_()
+        self.show()
+
+        corners = [
+            QPointF(0, 0), QPointF(self.width(), 0),
+            QPointF(0, self.height()), QPointF(self.width(), self.height()),
+        ]
+        self.max_r = max(math.hypot(c.x() - origin.x(), c.y() - origin.y()) for c in corners) + 12.0
+
+        self._anim = QVariantAnimation(self)
+        self._anim.setDuration(420)
+        self._anim.setStartValue(0.0)
+        self._anim.setEndValue(1.0)
+        self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._anim.valueChanged.connect(self._on_step)
+        self._anim.finished.connect(self.deleteLater)
+        self._anim.start()
+
+    def _on_step(self, val: float) -> None:
+        self._progress = float(val)
+        self.update()
+
+    def paintEvent(self, _event) -> None:
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        r = self._progress * self.max_r
+
+        clip = QPainterPath()
+        clip.setFillRule(Qt.FillRule.OddEvenFill)
+        clip.addRect(QRectF(self.rect()))
+        clip.addEllipse(self.origin, r, r)
+        p.setClipPath(clip)
+        p.drawPixmap(0, 0, self.old_pixmap)
+
+        p.setClipping(False)
+        ring_alpha = max(0, int(90 * (1.0 - self._progress)))
+        if ring_alpha > 0 and r > 4:
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.setPen(QPen(QColor(56, 189, 248, ring_alpha), 2.5))
+            p.drawEllipse(self.origin, r, r)
+        p.end()
+
+
 def build_stylesheet(theme: str) -> str:
     """Return dark or light QSS stylesheet for the Landing Suite."""
     if theme == "light":
@@ -406,9 +570,6 @@ class LandingWindow(QMainWindow):
         self.root_widget = QWidget()
         self.root_widget.setObjectName("Root")
         self.setCentralWidget(self.root_widget)
-        self.opacity_fx = QGraphicsOpacityEffect(self.root_widget)
-        self.opacity_fx.setOpacity(1.0)
-        self.root_widget.setGraphicsEffect(self.opacity_fx)
 
         outer = QVBoxLayout(self.root_widget)
         outer.setContentsMargins(14, 10, 14, 10)
@@ -468,39 +629,19 @@ class LandingWindow(QMainWindow):
         left_col.addLayout(info_row)
         hl.addLayout(left_col, 1)
 
-        # Action Controls: Segmented Theme Switch + View Repository
+        # Action Controls: Animated Segmented Theme Switch + View Repository
         self.hero_right = QWidget()
         self.right_col = QHBoxLayout(self.hero_right)
         self.right_col.setContentsMargins(0, 0, 0, 0)
         self.right_col.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.right_col.setSpacing(8)
 
-        theme_switch = QFrame()
-        theme_switch.setObjectName("ThemeSwitch")
-        sw_lay = QHBoxLayout(theme_switch)
-        sw_lay.setContentsMargins(3, 3, 3, 3)
-        sw_lay.setSpacing(2)
-        self.theme_group = QButtonGroup(self)
-        self.theme_group.setExclusive(True)
-        self.seg_dark = QPushButton()
-        self.seg_dark.setObjectName("SegBtn")
-        self.seg_dark.setCheckable(True)
-        self.seg_dark.setChecked(True)
-        self.seg_dark.setToolTip("Dark Mode")
-        self.seg_dark.clicked.connect(lambda: self._set_theme("dark"))
-        self.seg_light = QPushButton()
-        self.seg_light.setObjectName("SegBtn")
-        self.seg_light.setCheckable(True)
-        self.seg_light.setToolTip("Light Mode")
-        self.seg_light.clicked.connect(lambda: self._set_theme("light"))
-        self.theme_group.addButton(self.seg_dark)
-        self.theme_group.addButton(self.seg_light)
-        sw_lay.addWidget(self.seg_dark)
-        sw_lay.addWidget(self.seg_light)
+        self.theme_switch = AnimatedThemeSwitch(initial=self.theme, parent=self.hero_right)
+        self.theme_switch.themeChanged.connect(self._set_theme)
 
         self.repo_btn = QPushButton("View Repository")
         self.repo_btn.clicked.connect(self._on_view_repo)
-        self.right_col.addWidget(theme_switch)
+        self.right_col.addWidget(self.theme_switch)
         self.right_col.addWidget(self.repo_btn)
 
         self.hero_grid.addWidget(self.hero_left, 0, 0)
@@ -830,14 +971,17 @@ class LandingWindow(QMainWindow):
     def _set_theme(self, theme: str) -> None:
         if theme == self.theme:
             return
+        old_pm = self.root_widget.grab() if self.isVisible() else None
+        origin_pt = self.theme_switch.mapTo(self.root_widget, QPointF(self.theme_switch.width() / 2.0, self.theme_switch.height() / 2.0).toPoint())
         self.theme = theme
         self._apply_theme(animate=True)
+        if old_pm is not None and not old_pm.isNull():
+            self._theme_overlay = ThemeTransitionOverlay(self.root_widget, old_pm, QPointF(origin_pt))
 
     def _apply_theme(self, animate: bool = True) -> None:
         self.setStyleSheet(build_stylesheet(self.theme))
         is_dark = self.theme == "dark"
-        self.seg_dark.setChecked(is_dark)
-        self.seg_light.setChecked(not is_dark)
+        self.theme_switch.set_theme(self.theme, animate=animate)
 
         card_bg = "#162033" if is_dark else "#ffffff"
         card_bd = "#29354d" if is_dark else "#cbd5e1"
@@ -880,18 +1024,7 @@ class LandingWindow(QMainWindow):
 
         self.search_action.setIcon(QIcon(draw_vector_icon("search", icon_fg, 14)))
         self.repo_btn.setIcon(QIcon(draw_vector_icon("git", hero_fg, 15)))
-        self.seg_dark.setIcon(QIcon(draw_vector_icon("moon", "#f8fafc" if is_dark else "#475569", 15)))
-        self.seg_light.setIcon(QIcon(draw_vector_icon("sun", "#fbbf24" if not is_dark else "#94a3b8", 15)))
         self._refresh_running_count()
-
-        if animate:
-            anim = QPropertyAnimation(self.opacity_fx, b"opacity", self)
-            anim.setDuration(260)
-            anim.setStartValue(0.65)
-            anim.setEndValue(1.0)
-            anim.setEasingCurve(QEasingCurve.Type.OutCubic)
-            anim.start()
-            self._theme_anim = anim
 
     def _launch_lab(self, lab: dict) -> None:
         script_path = self.base_dir / lab["folder"] / lab["script"]
