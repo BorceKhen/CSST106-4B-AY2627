@@ -554,13 +554,11 @@ async function runDeepLabOnImageData(id) {
 // UI CONTROLLER
 // ============================================================================
 let activeCat = "All", currentLab = null, camStream = null, camRaf = null, onThemeRefresh = null;
+const visitedLabs = new Set();
 const homeView = document.getElementById("home-view");
 const wsView = document.getElementById("workspace-view");
 const gridEl = document.getElementById("grid");
 const searchEl = document.getElementById("search");
-
-const SUN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
-const MOON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
 function applyTheme(theme, animate = false) {
   if (animate) {
@@ -570,24 +568,27 @@ function applyTheme(theme, animate = false) {
   }
   document.documentElement.setAttribute("data-theme", theme);
   try { localStorage.setItem("csst106-theme", theme); } catch (_) {}
-  const html = theme === "dark" ? `${SUN_SVG}<span>Light</span>` : `${MOON_SVG}<span>Dark</span>`;
-  ["theme-toggle-home", "theme-toggle-ws"].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.innerHTML = html;
+  document.querySelectorAll(".seg-btn[data-set-theme]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.setTheme === theme);
   });
   if (onThemeRefresh) onThemeRefresh();
 }
 
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute("data-theme") || "dark";
-  applyTheme(cur === "dark" ? "light" : "dark", true);
-}
-
-["theme-toggle-home", "theme-toggle-ws"].forEach(id => {
-  const btn = document.getElementById(id);
-  if (btn) btn.onclick = toggleTheme;
+document.querySelectorAll(".seg-btn[data-set-theme]").forEach(btn => {
+  btn.onclick = () => {
+    const next = btn.dataset.setTheme;
+    const cur = document.documentElement.getAttribute("data-theme") || "dark";
+    if (next !== cur) applyTheme(next, true);
+  };
 });
 applyTheme((() => { try { return localStorage.getItem("csst106-theme") || "dark"; } catch (_) { return "dark"; } })(), false);
+
+// Populate category counts on filter chips
+document.querySelectorAll(".chip[data-cat]").forEach(chip => {
+  const cat = chip.dataset.cat;
+  const count = cat === "All" ? LABS.length : LABS.filter(l => l.cat === cat).length;
+  chip.textContent = `${cat} (${count})`;
+});
 
 function triggerViewAnim(el) {
   el.classList.remove("anim-view");
@@ -600,41 +601,92 @@ function stopCam() {
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
 }
 
+function updateTelemetry() {
+  const tEl = document.getElementById("telemetry-text");
+  if (!tEl) return;
+  const doneTxt = visitedLabs.size ? ` • ${visitedLabs.size} Explored` : "";
+  tEl.textContent = `${LABS.length} / ${LABS.length} Interactive Labs Ready${doneTxt}`;
+}
+
+function makeUtilityCard() {
+  const hasOrt = typeof ort !== "undefined";
+  const hasWasm = typeof WebAssembly === "object";
+  const hasCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const envItems = [
+    ["Canvas 2D", "Ready"],
+    ["WebAssembly", hasWasm ? "Supported" : "N/A"],
+    ["ONNX Runtime", hasOrt ? "Loaded" : "Pending"],
+    ["Camera API", hasCam ? "Available" : "HTTP/No Cam"],
+  ];
+  const card = document.createElement("article");
+  card.className = "card card-util";
+  card.style.setProperty("--accent", "#38bdf8");
+  card.innerHTML = `
+    <div class="card-head">
+      <div class="lab-icon" style="color:#38bdf8;border-color:#38bdf8;background:#38bdf81f">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="card-top">
+          <span class="lab-pill">Environment</span>
+          <span class="tag">Browser Runtime</span>
+          <span class="status-pill">● Online</span>
+        </div>
+        <h2>Runtime &amp; Course Quick Check</h2>
+      </div>
+    </div>
+    <div class="env-grid">
+      ${envItems.map(([k, v]) => `<div class="env-pill">● ${k}: ${v}</div>`).join("")}
+    </div>
+    <p>All 7 interactive CV labs &amp; Borce_Lab_0X_Report.docx bundles run client-side via Canvas 2D and ONNX Runtime Web.</p>`;
+  return card;
+}
+
 function renderHome() {
   stopCam();
   onThemeRefresh = null;
   homeView.style.display = "block";
   wsView.style.display = "none";
   triggerViewAnim(homeView);
+  updateTelemetry();
+
   const q = searchEl.value.trim().toLowerCase();
   gridEl.innerHTML = "";
-  LABS.filter(l => (activeCat === "All" || l.cat === activeCat) &&
-    (!q || l.title.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q) || l.num.toLowerCase().includes(q)))
-    .forEach(l => {
-      const card = document.createElement("article");
-      card.className = "card";
-      card.style.setProperty("--accent", l.accent);
-      card.innerHTML = `
-        <div class="card-head">
-          <div class="lab-icon" style="color:${l.accent};border-color:${l.accent};background:${l.accent}1f">${l.icon}</div>
-          <div>
-            <div class="card-top">
-              <span class="lab-pill">${l.num}</span>
-              <span class="tag">${l.week}</span>
-              <span class="tag">${l.cat}</span>
-            </div>
-            <h2>${l.title}</h2>
+  const filtered = LABS.filter(l => (activeCat === "All" || l.cat === activeCat) &&
+    (!q || l.title.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q) ||
+      l.num.toLowerCase().includes(q) || l.cat.toLowerCase().includes(q)));
+
+  filtered.forEach(l => {
+    const explored = visitedLabs.has(l.id);
+    const card = document.createElement("article");
+    card.className = "card";
+    card.style.setProperty("--accent", l.accent);
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="lab-icon" style="color:${l.accent};border-color:${l.accent};background:${l.accent}1f">${l.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="card-top">
+            <span class="lab-pill">${l.num}</span>
+            <span class="tag">${l.week}</span>
+            <span class="tag">${l.cat}</span>
+            <span class="status-pill ${explored ? "active-lab" : ""}">${explored ? "● Active" : "● Ready"}</span>
           </div>
+          <h2>${l.title}</h2>
         </div>
-        <p>${l.desc}</p>
-        <div class="card-actions">
-          <button class="btn btn-lab" data-open="${l.id}">▶ Launch Lab</button>
-          <a class="btn" href="${l.report}">Report (.docx)</a>
-          <a class="btn" href="${l.manual}">Manual (.docx)</a>
-        </div>`;
-      card.querySelector("[data-open]").onclick = () => openLab(l);
-      gridEl.appendChild(card);
-    });
+      </div>
+      <p>${l.desc}</p>
+      <div class="card-actions">
+        <button class="btn btn-lab" data-open="${l.id}">▶ Launch Lab</button>
+        <a class="btn btn-ghost" href="${l.report}">Report (.docx)</a>
+        <a class="btn btn-ghost" href="${l.manual}">Manual (.docx)</a>
+      </div>`;
+    card.querySelector("[data-open]").onclick = () => openLab(l);
+    gridEl.appendChild(card);
+  });
+
+  if (activeCat === "All" && !q) {
+    gridEl.appendChild(makeUtilityCard());
+  }
 }
 
 document.getElementById("chips").addEventListener("click", (e) => {
@@ -650,6 +702,9 @@ async function openLab(lab) {
   stopCam();
   onThemeRefresh = null;
   currentLab = lab;
+  visitedLabs.add(lab.id);
+  const statusMsg = document.getElementById("status-msg");
+  if (statusMsg) statusMsg.textContent = `Last opened ${lab.num}: ${lab.title}`;
   homeView.style.display = "none";
   wsView.style.display = "block";
   triggerViewAnim(wsView);
