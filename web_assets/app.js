@@ -31,7 +31,7 @@ const LABS = [
     title: "Image Representation & Manipulation",
     desc: "Explore 2D/3D pixel arrays, BGR vs. grayscale, pixel editing, ROI cropping, resizing, and 90° rotation.",
     sample: "./Lab_01_Images/sample_image.png",
-    report: "./Lab_01_Images/Lab_01_Report.docx",
+    report: "./Lab_01_Images/Borce_Lab_01_Report.docx",
     manual: "./Lab_01_Images/CSST106_Lab_Experiment_01_Images.docx",
     code: "Lab_01_Images/lab1_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5" fill="currentColor"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg>`
@@ -41,7 +41,7 @@ const LABS = [
     title: "Edge Detection (Sobel vs. Canny)",
     desc: "Gaussian smoothing, Sobel directional X/Y gradients & magnitude, Canny hysteresis (T1/T2), and Q&A.",
     sample: "./Lab_02_Edge_Detection/input.jpg",
-    report: "./Lab_02_Edge_Detection/Lab_02_Report.docx",
+    report: "./Lab_02_Edge_Detection/Borce_Lab_02_Report.docx",
     manual: "./Lab_02_Edge_Detection/CSST106_Lab_Experiment_02_Edge_Detection.docx",
     code: "Lab_02_Edge_Detection/lab2_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l5-10 4 9 4-11 5 8"/></svg>`
@@ -51,7 +51,7 @@ const LABS = [
     title: "Histogram Equalization & Contrast",
     desc: "Global equalizeHist (Gray & YUV), linear contrast stretch, adaptive CLAHE tuning, and live histograms.",
     sample: "./Lab_03_Histogram/sample_low_contrast.png",
-    report: "./Lab_03_Histogram/Lab_03_Report.docx",
+    report: "./Lab_03_Histogram/Borce_Lab_03_Report.docx",
     manual: "./Lab_03_Histogram/CSST106_Lab_Experiment_03_Histogram.docx",
     code: "Lab_03_Histogram/lab3_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="12" width="3" height="8" rx="1"/><rect x="9" y="7" width="3" height="13" rx="1"/><rect x="14" y="4" width="3" height="16" rx="1"/><rect x="19" y="10" width="3" height="10" rx="1"/></svg>`
@@ -62,7 +62,7 @@ const LABS = [
     desc: "Rich keypoint detection, two-image descriptor matching, SIFT vs. ORB benchmark, and U-SURF notes.",
     sample: "./Lab_04_SURF_Feature_Detection/sample_image.jpg",
     sample2: "./Lab_04_SURF_Feature_Detection/sample_image_transformed.jpg",
-    report: "./Lab_04_SURF_Feature_Detection/Lab_04_Report.docx",
+    report: "./Lab_04_SURF_Feature_Detection/Borce_Lab_04_Report.docx",
     manual: "./Lab_04_SURF_Feature_Detection/CSST106_Lab_Experiment_04_SURF_Feature_Detection.docx",
     code: "Lab_04_SURF_Feature_Detection/lab4_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="7" r="2" fill="currentColor"/><circle cx="18" cy="6" r="2" fill="currentColor"/><circle cx="12" cy="13" r="2" fill="currentColor"/><circle cx="6" cy="18" r="2" fill="currentColor"/><circle cx="18" cy="17" r="2" fill="currentColor"/><path d="M7.5 8l3 4M16.5 7l-3 5M7.5 17l3-3M16.5 16l-3-2"/></svg>`
@@ -71,7 +71,7 @@ const LABS = [
     id: "lab5", num: "Lab 05", week: "Week 7–8", cat: "Features & ML", accent: "#f472b6",
     title: "PCA Facial Recognition (Eigenfaces)",
     desc: "LFW faces, Eigenfaces gallery, 90% variance curve, whitening comparison, RBF SVM, and failure analysis.",
-    report: "./Lab_05_PCA_in_CV/Lab_05_Report.docx",
+    report: "./Lab_05_PCA_in_CV/Borce_Lab_05_Report.docx",
     manual: "./Lab_05_PCA_in_CV/CSST106_Lab_Experiment_05_PCA_in_CV.docx",
     code: "Lab_05_PCA_in_CV/lab5_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="5"/><circle cx="9.5" cy="10" r="1" fill="currentColor"/><circle cx="14.5" cy="10" r="1" fill="currentColor"/><path d="M9 15c1.5 1.5 4.5 1.5 6 0"/></svg>`
@@ -81,7 +81,7 @@ const LABS = [
     title: "YOLOv11 Real-Time Object Detection",
     desc: "Browser ONNX YOLOv11n inference on images & live webcam, confidence tuning, and custom dataset setup.",
     sample: "./Lab_06_YOLO_Object_Detection/sample_scene.jpg",
-    report: "./Lab_06_YOLO_Object_Detection/Lab_06_Report.docx",
+    report: "./Lab_06_YOLO_Object_Detection/Borce_Lab_06_Report.docx",
     manual: "./Lab_06_YOLO_Object_Detection/CSST106_Lab_Experiment_06_YOLOV8_Object_Detection.docx",
     code: "Lab_06_YOLO_Object_Detection/lab6_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="12" r="3"/></svg>`
@@ -92,7 +92,7 @@ const LABS = [
     desc: "Otsu/Adaptive thresholding, Region Growing & Watershed, Canny contours, DeepLabV3 ONNX, and IoU metrics.",
     sample: "./Lab_07_Segmentation/sample_objects.png",
     sample2: "./Lab_07_Segmentation/sample_scene.jpg",
-    report: "./Lab_07_Segmentation/Lab_07_Report.docx",
+    report: "./Lab_07_Segmentation/Borce_Lab_07_Report.docx",
     manual: "./Lab_07_Segmentation/CSST106_Lab_Experiment_07_Segmetation.docx",
     code: "Lab_07_Segmentation/lab7_ui.py",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9.5" cy="10" r="5" fill="currentColor" fill-opacity="0.25"/><circle cx="14.5" cy="14" r="5" fill="currentColor" fill-opacity="0.55"/></svg>`

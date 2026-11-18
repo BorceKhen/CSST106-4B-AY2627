@@ -44,7 +44,7 @@ LABS = [
         "desc": "Explore 2D/3D pixel arrays, BGR vs. grayscale, pixel editing, ROI cropping, resizing, and 90° rotation.",
         "folder": "Lab_01_Images",
         "script": "lab1_ui.py",
-        "report": "Lab_01_Report.docx",
+        "report": "Borce_Lab_01_Report.docx",
         "manual": "CSST106_Lab_Experiment_01_Images.docx",
     },
     {
@@ -58,7 +58,7 @@ LABS = [
         "desc": "Gaussian smoothing, Sobel directional X/Y gradients & magnitude, Canny hysteresis (T1/T2), and Q&A.",
         "folder": "Lab_02_Edge_Detection",
         "script": "lab2_ui.py",
-        "report": "Lab_02_Report.docx",
+        "report": "Borce_Lab_02_Report.docx",
         "manual": "CSST106_Lab_Experiment_02_Edge_Detection.docx",
     },
     {
@@ -72,7 +72,7 @@ LABS = [
         "desc": "Global equalizeHist (Gray & YUV), linear contrast stretch, adaptive CLAHE tuning, and live histograms.",
         "folder": "Lab_03_Histogram",
         "script": "lab3_ui.py",
-        "report": "Lab_03_Report.docx",
+        "report": "Borce_Lab_03_Report.docx",
         "manual": "CSST106_Lab_Experiment_03_Histogram.docx",
     },
     {
@@ -86,7 +86,7 @@ LABS = [
         "desc": "Rich keypoint detection, two-image BFMatcher matching, SIFT vs. ORB benchmark, and U-SURF notes.",
         "folder": "Lab_04_SURF_Feature_Detection",
         "script": "lab4_ui.py",
-        "report": "Lab_04_Report.docx",
+        "report": "Borce_Lab_04_Report.docx",
         "manual": "CSST106_Lab_Experiment_04_SURF_Feature_Detection.docx",
     },
     {
@@ -100,7 +100,7 @@ LABS = [
         "desc": "LFW faces, Eigenfaces gallery, 90% variance curve, whitening comparison, RBF SVM, and failure analysis.",
         "folder": "Lab_05_PCA_in_CV",
         "script": "lab5_ui.py",
-        "report": "Lab_05_Report.docx",
+        "report": "Borce_Lab_05_Report.docx",
         "manual": "CSST106_Lab_Experiment_05_PCA_in_CV.docx",
     },
     {
@@ -114,7 +114,7 @@ LABS = [
         "desc": "Pre-trained YOLOv11n inference on images & live webcam, confidence tuning, and custom dataset setup.",
         "folder": "Lab_06_YOLO_Object_Detection",
         "script": "lab6_ui.py",
-        "report": "Lab_06_Report.docx",
+        "report": "Borce_Lab_06_Report.docx",
         "manual": "CSST106_Lab_Experiment_06_YOLOV8_Object_Detection.docx",
     },
     {
@@ -128,7 +128,7 @@ LABS = [
         "desc": "Otsu/Adaptive thresholding, Region Growing & Watershed, Canny contours, DeepLabV3, and IoU metrics.",
         "folder": "Lab_07_Segmentation",
         "script": "lab7_ui.py",
-        "report": "Lab_07_Report.docx",
+        "report": "Borce_Lab_07_Report.docx",
         "manual": "CSST106_Lab_Experiment_07_Segmetation.docx",
     },
 ]

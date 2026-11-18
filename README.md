@@ -28,13 +28,13 @@ python main.py
 
 | Lab | Week | Topic | Interactive UI | Report |
 |---|---|---|---|---|
-| **Lab 01** | 1–2 | Image Representation & Manipulation | `Lab_01_Images/lab1_ui.py` | `Lab_01_Images/Lab_01_Report.docx` |
-| **Lab 02** | 3–4 | Edge Detection (Sobel & Canny) | `Lab_02_Edge_Detection/lab2_ui.py` | `Lab_02_Edge_Detection/Lab_02_Report.docx` |
-| **Lab 03** | 4–5 | Histogram Equalization & Contrast Adjustment | `Lab_03_Histogram/lab3_ui.py` | `Lab_03_Histogram/Lab_03_Report.docx` |
-| **Lab 04** | 6 | SURF, SIFT & ORB Feature Matching | `Lab_04_SURF_Feature_Detection/lab4_ui.py` | `Lab_04_SURF_Feature_Detection/Lab_04_Report.docx` |
-| **Lab 05** | 7–8 | Facial Recognition using PCA (Eigenfaces) & SVM | `Lab_05_PCA_in_CV/lab5_ui.py` | `Lab_05_PCA_in_CV/Lab_05_Report.docx` |
-| **Lab 06** | 8–9 | Object Detection with YOLOv11 | `Lab_06_YOLO_Object_Detection/lab6_ui.py` | `Lab_06_YOLO_Object_Detection/Lab_06_Report.docx` |
-| **Lab 07** | 13 | Image Segmentation (Otsu, Watershed, Edge, DeepLabV3) | `Lab_07_Segmentation/lab7_ui.py` | `Lab_07_Segmentation/Lab_07_Report.docx` |
+| **Lab 01** | 1–2 | Image Representation & Manipulation | `Lab_01_Images/lab1_ui.py` | `Lab_01_Images/Borce_Lab_01_Report.docx` |
+| **Lab 02** | 3–4 | Edge Detection (Sobel & Canny) | `Lab_02_Edge_Detection/lab2_ui.py` | `Lab_02_Edge_Detection/Borce_Lab_02_Report.docx` |
+| **Lab 03** | 4–5 | Histogram Equalization & Contrast Adjustment | `Lab_03_Histogram/lab3_ui.py` | `Lab_03_Histogram/Borce_Lab_03_Report.docx` |
+| **Lab 04** | 6 | SURF, SIFT & ORB Feature Matching | `Lab_04_SURF_Feature_Detection/lab4_ui.py` | `Lab_04_SURF_Feature_Detection/Borce_Lab_04_Report.docx` |
+| **Lab 05** | 7–8 | Facial Recognition using PCA (Eigenfaces) & SVM | `Lab_05_PCA_in_CV/lab5_ui.py` | `Lab_05_PCA_in_CV/Borce_Lab_05_Report.docx` |
+| **Lab 06** | 8–9 | Object Detection with YOLOv11 | `Lab_06_YOLO_Object_Detection/lab6_ui.py` | `Lab_06_YOLO_Object_Detection/Borce_Lab_06_Report.docx` |
+| **Lab 07** | 13 | Image Segmentation (Otsu, Watershed, Edge, DeepLabV3) | `Lab_07_Segmentation/lab7_ui.py` | `Lab_07_Segmentation/Borce_Lab_07_Report.docx` |
 
 ---
 
