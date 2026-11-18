@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSST 106 — Computer Vision Laboratory Suite</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #162033;
+      --card-hover: #1a263c;
+      --border: #29354d;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 18px 40px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; }
+    .hero {
+      background: linear-gradient(135deg, #172554, #1e293b 55%, #0f172a);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 22px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .badge {
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .tag {
+      background: #0f172a;
+      color: var(--muted);
+      border: 1px solid #334155;
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    h1 { margin: 8px 0 10px; font-size: 24px; color: #f8fafc; }
+    .meta { display: flex; gap: 28px; flex-wrap: wrap; }
+    .meta small { display: block; color: var(--muted); font-size: 11px; font-weight: 600; }
+    .meta strong { font-size: 14px; color: #f1f5f9; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      background: #223047;
+      color: var(--text);
+      border: 1px solid #354764;
+      cursor: pointer;
+    }
+    .btn:hover { background: #2d3f5e; }
+    .btn-primary { background: #0284c7; color: #fff; border-color: #38bdf8; }
+    .btn-primary:hover { background: #0369a1; }
+    .toolbar {
+      background: #131c31;
+      border: 1px solid #25334d;
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .chip.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
+    input[type="search"] {
+      background: #0b1120;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 7px;
+      padding: 7px 11px;
+      font-size: 12px;
+      width: 260px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent, #38bdf8);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card:hover { background: var(--card-hover); border-color: var(--accent, #38bdf8); }
+    .card-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .lab-pill {
+      background: var(--accent, #38bdf8);
+      color: #0f172a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+    .card h2 { margin: 0; font-size: 15px; color: #f8fafc; }
+    .card p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45; flex: 1; }
+    .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .foot {
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: #131c31;
+      border: 1px solid #25334d;
+      border-radius: 9px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    code { color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <span class="badge">CSST 106</span>
+        <span class="tag">Perception and Computer Vision • 1st Semester, AY 2026–2027</span>
+        <h1>Computer Vision Laboratory Suite</h1>
+        <div class="meta">
+          <div><small>Student</small><strong>Ron Ken S. Borce</strong></div>
+          <div><small>Section</small><strong>BSCS 4B</strong></div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/BorceKhen/CSST106-4B-AY2627" target="_blank" rel="noopener">View Repository</a>
+        <a class="btn" href="#deploy-guide">Run Live App</a>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="chips" id="chips">
+        <button class="chip active" data-cat="All">All</button>
+        <button class="chip" data-cat="Image Processing">Image Processing</button>
+        <button class="chip" data-cat="Features & ML">Features &amp; ML</button>
+        <button class="chip" data-cat="Deep Learning">Deep Learning</button>
+      </div>
+      <input type="search" id="search" placeholder="Filter labs (Canny, YOLO, PCA, Segmentation)..." />
+    </section>
+
+    <section class="grid" id="grid"></section>
+
+    <section class="foot" id="deploy-guide">
+      <strong>Running Live Interactive Python Apps:</strong>
+      Clone and launch locally with <code>pip install -r requirements-desktop.txt &amp;&amp; python main.py</code>,
+      or deploy <code>streamlit_app.py</code> on <strong>Streamlit Community Cloud</strong> directly from
+      <code>BorceKhen/CSST106-4B-AY2627</code> to run all 7 OpenCV, PCA, YOLOv11, and DeepLabV3 modules live in the browser.
+    </section>
+  </div>
+
+  <script>
+    const LABS = [
+      { num: "Lab 01", week: "Week 1–2", cat: "Image Processing", accent: "#38bdf8",
+        title: "Image Representation & Manipulation",
+        desc: "Explore 2D/3D pixel arrays, BGR vs. grayscale, pixel editing, ROI cropping, resizing, and 90° rotation.",
+        code: "Lab_01_Images/lab1_ui.py",
+        report: "Lab_01_Images/Lab_01_Report.docx",
+        manual: "Lab_01_Images/CSST106_Lab_Experiment_01_Images.docx" },
+      { num: "Lab 02", week: "Week 3–4", cat: "Image Processing", accent: "#a78bfa",
+        title: "Edge Detection (Sobel vs. Canny)",
+        desc: "Gaussian smoothing, Sobel directional X/Y gradients & magnitude, Canny hysteresis (T1/T2), and Q&A.",
+        code: "Lab_02_Edge_Detection/lab2_ui.py",
+        report: "Lab_02_Edge_Detection/Lab_02_Report.docx",
+        manual: "Lab_02_Edge_Detection/CSST106_Lab_Experiment_02_Edge_Detection.docx" },
+      { num: "Lab 03", week: "Week 4–5", cat: "Image Processing", accent: "#34d399",
+        title: "Histogram Equalization & Contrast",
+        desc: "Global equalizeHist (Gray & YUV), linear contrast stretch, adaptive CLAHE tuning, and live histograms.",
+        code: "Lab_03_Histogram/lab3_ui.py",
+        report: "Lab_03_Histogram/Lab_03_Report.docx",
+        manual: "Lab_03_Histogram/CSST106_Lab_Experiment_03_Histogram.docx" },
+      { num: "Lab 04", week: "Week 6", cat: "Features & ML", accent: "#fbbf24",
+        title: "SURF, SIFT & ORB Feature Matching",
+        desc: "Rich keypoint detection, two-image BFMatcher matching, SIFT vs. ORB benchmark, and U-SURF notes.",
+        code: "Lab_04_SURF_Feature_Detection/lab4_ui.py",
+        report: "Lab_04_SURF_Feature_Detection/Lab_04_Report.docx",
+        manual: "Lab_04_SURF_Feature_Detection/CSST106_Lab_Experiment_04_SURF_Feature_Detection.docx" },
+      { num: "Lab 05", week: "Week 7–8", cat: "Features & ML", accent: "#f472b6",
+        title: "PCA Facial Recognition (Eigenfaces)",
+        desc: "LFW faces, Eigenfaces gallery, 90% variance curve, whitening comparison, RBF SVM, and failure analysis.",
+        code: "Lab_05_PCA_in_CV/lab5_ui.py",
+        report: "Lab_05_PCA_in_CV/Lab_05_Report.docx",
+        manual: "Lab_05_PCA_in_CV/CSST106_Lab_Experiment_05_PCA_in_CV.docx" },
+      { num: "Lab 06", week: "Week 8–9", cat: "Deep Learning", accent: "#fb7185",
+        title: "YOLOv11 Real-Time Object Detection",
+        desc: "Pre-trained YOLOv11n inference on images & live webcam, confidence tuning, and custom dataset setup.",
+        code: "Lab_06_YOLO_Object_Detection/lab6_ui.py",
+        report: "Lab_06_YOLO_Object_Detection/Lab_06_Report.docx",
+        manual: "Lab_06_YOLO_Object_Detection/CSST106_Lab_Experiment_06_YOLOV8_Object_Detection.docx" },
+      { num: "Lab 07", week: "Week 13", cat: "Deep Learning", accent: "#2dd4bf",
+        title: "Image Segmentation Techniques",
+        desc: "Otsu/Adaptive thresholding, Region Growing & Watershed, Canny contours, DeepLabV3, and IoU metrics.",
+        code: "Lab_07_Segmentation/lab7_ui.py",
+        report: "Lab_07_Segmentation/Lab_07_Report.docx",
+        manual: "Lab_07_Segmentation/CSST106_Lab_Experiment_07_Segmetation.docx" },
+    ];
+
+    let activeCat = "All";
+    const grid = document.getElementById("grid");
+    const search = document.getElementById("search");
+
+    function render() {
+      const q = search.value.trim().toLowerCase();
+      grid.innerHTML = "";
+      LABS.filter(l => (activeCat === "All" || l.cat === activeCat) &&
+        (!q || l.title.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q) || l.num.toLowerCase().includes(q)))
+        .forEach(l => {
+          const el = document.createElement("article");
+          el.className = "card";
+          el.style.setProperty("--accent", l.accent);
+          el.innerHTML = `
+            <div class="card-top">
+              <span class="lab-pill">${l.num}</span>
+              <span class="tag">${l.week}</span>
+              <span class="tag">${l.cat}</span>
+            </div>
+            <h2>${l.title}</h2>
+            <p>${l.desc}</p>
+            <div class="card-actions">
+              <a class="btn btn-primary" href="https://github.com/BorceKhen/CSST106-4B-AY2627/blob/main/${l.code}" target="_blank" rel="noopener">View Code</a>
+              <a class="btn" href="./${l.report}">Report (.docx)</a>
+              <a class="btn" href="./${l.manual}">Manual (.docx)</a>
+            </div>`;
+          grid.appendChild(el);
+        });
+    }
+
+    document.getElementById("chips").addEventListener("click", (e) => {
+      if (!e.target.dataset.cat) return;
+      activeCat = e.target.dataset.cat;
+      document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.cat === activeCat));
+      render();
+    });
+    search.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

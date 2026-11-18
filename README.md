@@ -11,14 +11,23 @@ Interactive PyQt6 laboratory suite and written reports covering Labs 1 through 7
 
 ## Quick Start
 
+### Option 1: Desktop PyQt6 Suite (`main.py`)
 ```bash
 git clone https://github.com/BorceKhen/CSST106-4B-AY2627.git
 cd CSST106-4B-AY2627
-pip install -r requirements.txt
+pip install -r requirements-desktop.txt
 python main.py
 ```
 
-`main.py` launches the central hub where you can filter/search all 7 laboratories, launch any lab's interactive UI, or open its `.docx` Report and Lab Manual.
+### Option 2: Live Web App (`streamlit_app.py`)
+Run locally or deploy directly on **Streamlit Community Cloud** (uses `requirements.txt` and `packages.txt`):
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+### Option 3: GitHub Pages (`index.html`)
+Enable **Settings → Pages → Deploy from branch (`main` / `/(root)`)** to publish the interactive landing page, Q&A links, and downloadable `.docx` reports at `https://borcekhen.github.io/CSST106-4B-AY2627/`.
 
 ---
 
