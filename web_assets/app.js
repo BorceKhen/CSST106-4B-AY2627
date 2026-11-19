@@ -710,9 +710,10 @@ function renderHome() {
 }
 
 document.getElementById("chips").addEventListener("click", (e) => {
-  if (!e.target.dataset.cat) return;
-  activeCat = e.target.dataset.cat;
-  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.cat === activeCat));
+  const chip = e.target.closest("[data-cat]");
+  if (!chip) return;
+  activeCat = chip.dataset.cat;
+  document.querySelectorAll("#chips .chip").forEach(c => c.classList.toggle("active", c.dataset.cat === activeCat));
   renderHome();
 });
 searchEl.addEventListener("input", renderHome);
@@ -872,8 +873,9 @@ async function mountLab1(lab, body) {
     sel = [y, x]; if (tab==="pixel") renderControls(); update();
   };
   document.getElementById("l1-tabs").addEventListener("click", e => {
-    if (!e.target.dataset.t) return;
-    tab = e.target.dataset.t;
+    const btn = e.target.closest("[data-t]");
+    if (!btn) return;
+    tab = btn.dataset.t;
     document.querySelectorAll("#l1-tabs .tab").forEach(b=>b.classList.toggle("active", b.dataset.t===tab));
     renderControls(); update();
   });
@@ -1195,11 +1197,20 @@ async function mountLab6(lab, body) {
   };
   body.querySelector("#l6-cam").onclick = async () => {
     const btn = body.querySelector("#l6-cam");
-    if (camStream) { stopCam(); btn.textContent = "Start Live Webcam"; runOn(srcId); return; }
+    if (camStream) {
+      stopCam();
+      btn.textContent = "Start Live Webcam";
+      btn.classList.remove("btn-danger");
+      btn.classList.add("btn-primary");
+      runOn(srcId);
+      return;
+    }
     try {
       camStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
       const vid = body.querySelector("#l6-vid"); vid.srcObject = camStream;
       btn.textContent = "Stop Webcam";
+      btn.classList.remove("btn-primary");
+      btn.classList.add("btn-danger");
       const tick = async () => {
         if (!camStream) return;
         if (vid.readyState >= 2) {
@@ -1226,8 +1237,10 @@ async function mountLab7(lab, body) {
 
   body.innerHTML = `
     <div class="toolbar">
-      <button class="chip active" id="l7-obj">Objects Sample</button>
-      <button class="chip" id="l7-scn">Scene Sample</button>
+      <div class="chips chips-seg" id="l7-sample-chips">
+        <button class="chip active" id="l7-obj">Objects Sample</button>
+        <button class="chip" id="l7-scn">Scene Sample</button>
+      </div>
       <label>Region Grow Tol: <span id="l7-tv">30</span> <input type="range" id="l7-tol" min="5" max="80" value="30"></label>
       <label class="btn">Upload Image<input type="file" id="l7-file" accept="image/*" hidden></label>
       <button class="btn btn-primary" id="l7-sem">Run DeepLabV3 ONNX</button>
@@ -1271,11 +1284,24 @@ async function mountLab7(lab, body) {
     body.querySelector("#l7-dl").textContent = "Canny Edges (click Run DeepLabV3)";
   }
 
+  function setSampleActive(activeId) {
+    ["l7-obj", "l7-scn"].forEach(id => {
+      const el = body.querySelector(`#${id}`);
+      if (el) el.classList.toggle("active", id === activeId);
+    });
+  }
+
   async function runSemantic() {
+    const semBtn = body.querySelector("#l7-sem");
+    if (semBtn) { semBtn.classList.add("is-busy"); semBtn.textContent = "Running DeepLabV3..."; }
     body.querySelector("#l7-dl").textContent = "Running DeepLabV3...";
-    const { imageData, classes } = await runDeepLabOnImageData(srcId);
-    drawImageData(body.querySelector("#l7-c4"), imageData);
-    body.querySelector("#l7-dl").textContent = classes.length ? classes.join(", ") : "background";
+    try {
+      const { imageData, classes } = await runDeepLabOnImageData(srcId);
+      drawImageData(body.querySelector("#l7-c4"), imageData);
+      body.querySelector("#l7-dl").textContent = classes.length ? classes.join(", ") : "background";
+    } finally {
+      if (semBtn) { semBtn.classList.remove("is-busy"); semBtn.textContent = "Run DeepLabV3 ONNX"; }
+    }
   }
 
   body.querySelector("#l7-c1").onclick = e => {
@@ -1284,9 +1310,27 @@ async function mountLab7(lab, body) {
     runClassical();
   };
   body.querySelector("#l7-tol").oninput = e => { tol = +e.target.value; body.querySelector("#l7-tv").textContent = tol; runClassical(); };
-  body.querySelector("#l7-obj").onclick = async () => { srcId = imgToImageData(await loadHTMLImage(lab.sample), 480); seed=[145,155]; runClassical(); };
-  body.querySelector("#l7-scn").onclick = async () => { srcId = imgToImageData(await loadHTMLImage(lab.sample2), 480); runClassical(); await runSemantic(); };
-  body.querySelector("#l7-file").onchange = async e => { if (e.target.files[0]) { srcId = imgToImageData(await loadHTMLImage(URL.createObjectURL(e.target.files[0])), 480); runClassical(); } };
+  body.querySelector("#l7-obj").onclick = async () => {
+    setSampleActive("l7-obj");
+    srcId = imgToImageData(await loadHTMLImage(lab.sample), 480);
+    seed = [145, 155];
+    runClassical();
+  };
+  body.querySelector("#l7-scn").onclick = async () => {
+    setSampleActive("l7-scn");
+    srcId = imgToImageData(await loadHTMLImage(lab.sample2), 480);
+    seed = [Math.floor(srcId.height / 2), Math.floor(srcId.width / 2)];
+    runClassical();
+    await runSemantic();
+  };
+  body.querySelector("#l7-file").onchange = async e => {
+    if (e.target.files[0]) {
+      setSampleActive(null);
+      srcId = imgToImageData(await loadHTMLImage(URL.createObjectURL(e.target.files[0])), 480);
+      seed = [Math.floor(srcId.height / 2), Math.floor(srcId.width / 2)];
+      runClassical();
+    }
+  };
   body.querySelector("#l7-sem").onclick = runSemantic;
   runClassical();
 }

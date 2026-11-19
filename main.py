@@ -472,19 +472,22 @@ def build_stylesheet(theme: str) -> str:
         QLineEdit#SearchBox:focus { border-color: #0284c7; background-color: #eef4fc; }
         QPushButton { background-color: #d3e1f4; color: #1e293b; border: 1px solid #adc5e3; border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 600; }
         QPushButton:hover { background-color: #c2d6f0; border-color: #8eb0db; }
+        QPushButton:pressed { background-color: #afc8ea; }
         QPushButton#LaunchBtn {
             background-color: #0284c7; color: #f0f9ff; border: 1px solid #38bdf8;
             border-radius: 7px; padding: 6px 11px; font-size: 12px; font-weight: 700;
         }
         QPushButton#LaunchBtn:hover { background-color: #0369a1; border-color: #7dd3fc; }
+        QPushButton#LaunchBtn:pressed { background-color: #075985; }
         QPushButton#GhostBtn {
             background-color: rgba(211, 225, 244, 0.35); color: #3b4f6b; border: 1px solid #b4cae6;
             border-radius: 7px; padding: 6px 9px; font-size: 11.5px; font-weight: 600;
         }
         QPushButton#GhostBtn:hover { background-color: #d3e1f4; color: #0f172a; border-color: #8eb0db; }
+        QPushButton#GhostBtn:pressed { background-color: #bfd4ef; }
         QPushButton#ChipBtn { background-color: transparent; border: 1px solid transparent; color: #3b4f6b; padding: 5px 11px; font-size: 12px; }
         QPushButton#ChipBtn:hover { background-color: #d3e1f4; color: #0f172a; }
-        QPushButton#ChipBtn:checked { background-color: #0284c7; color: #f0f9ff; border: 1px solid #38bdf8; }
+        QPushButton#ChipBtn:checked, QPushButton#ChipBtn:checked:hover { background-color: #0284c7; color: #f0f9ff; border: 1px solid #38bdf8; }
         """
     return """
     QMainWindow, QWidget#Root { background-color: #0b1120; color: #e2e8f0; font-family: "Segoe UI", sans-serif; }
@@ -495,12 +498,6 @@ def build_stylesheet(theme: str) -> str:
     }
     QFrame#FilterBar { background-color: #131c31; border: 1px solid #25334d; border-radius: 9px; }
     QFrame#StatusFrame { background-color: #131c31; border: 1px solid #25334d; border-radius: 8px; }
-    QFrame#ThemeSwitch { background-color: #0f172a; border: 1px solid #334155; border-radius: 8px; }
-    QPushButton#SegBtn {
-        background: transparent; border: none; border-radius: 6px; padding: 5px 8px; color: #94a3b8;
-    }
-    QPushButton#SegBtn:hover { background-color: #1e293b; }
-    QPushButton#SegBtn:checked { background-color: #1e293b; color: #f8fafc; border: 1px solid #475569; }
     QLabel#CourseBadge { background-color: #f8fafc; color: #0f172a; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
     QLabel#Tag { background-color: #0f172a; color: #94a3b8; border: 1px solid #334155; font-size: 11px; padding: 2px 8px; border-radius: 5px; }
     QLabel#TelemetryPill { background-color: rgba(16, 185, 129, 0.12); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.35); font-family: "Consolas", monospace; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 9px; }
@@ -514,19 +511,22 @@ def build_stylesheet(theme: str) -> str:
     QLineEdit#SearchBox:focus { border-color: #38bdf8; }
     QPushButton { background-color: #223047; color: #e2e8f0; border: 1px solid #354764; border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 600; }
     QPushButton:hover { background-color: #2d3f5e; border-color: #64748b; }
+    QPushButton:pressed { background-color: #1b283d; }
     QPushButton#LaunchBtn {
         background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8;
         border-radius: 7px; padding: 6px 11px; font-size: 12px; font-weight: 700;
     }
     QPushButton#LaunchBtn:hover { background-color: #0369a1; border-color: #7dd3fc; }
+    QPushButton#LaunchBtn:pressed { background-color: #075985; }
     QPushButton#GhostBtn {
         background-color: transparent; color: #94a3b8; border: 1px solid #2b3b55;
         border-radius: 7px; padding: 6px 9px; font-size: 11.5px; font-weight: 600;
     }
     QPushButton#GhostBtn:hover { background-color: rgba(148, 163, 184, 0.12); color: #f8fafc; border-color: #475569; }
+    QPushButton#GhostBtn:pressed { background-color: rgba(148, 163, 184, 0.2); }
     QPushButton#ChipBtn { background-color: transparent; border: 1px solid transparent; color: #94a3b8; padding: 5px 11px; font-size: 12px; }
     QPushButton#ChipBtn:hover { background-color: #1e293b; color: #f8fafc; }
-    QPushButton#ChipBtn:checked { background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8; }
+    QPushButton#ChipBtn:checked, QPushButton#ChipBtn:checked:hover { background-color: #0284c7; color: #ffffff; border: 1px solid #38bdf8; }
     """
 
 
